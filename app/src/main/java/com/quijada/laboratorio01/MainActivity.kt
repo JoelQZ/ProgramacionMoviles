@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
             Laboratorio01Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Joel Quijada",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -36,8 +37,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Column (modifier = modifier) {
-        Text(text = "!Hola, soy Joel Quijada!", fontSize = 24.sp)
+        Text(text = "!Hola, soy $name!", fontSize = 24.sp)
         Text(text = "Curso: Programación en Moviles")
+        Button(onClick = { }){
+            Text(text = "Presioname")
+        }
     }
 }
 
