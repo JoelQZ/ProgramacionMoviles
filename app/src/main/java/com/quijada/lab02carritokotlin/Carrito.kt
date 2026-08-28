@@ -40,6 +40,10 @@ fun mostrarDetalle(productos: List<Producto>){
     println("---------------------------------------")
 }
 
+fun buscarProducto(productos: List<Producto>, nombre: String): Producto?{
+    return productos.find { it.nombre.equals(nombre, ignoreCase = true) }
+}
+
 fun main(){
     println("=========================================")
     println(" CARRITO DE COMPRAS - TIENDA TECSUP ")
@@ -64,6 +68,19 @@ fun main(){
         println("Producto mas caro: ${masCaro.nombre} " + String.format("(S/ %.2f)", masCaro.precio))
     }
     println()
+
+    val buscado = buscarProducto(carrito, "Teclado Aula")
+    if (buscado != null){
+        println("Producto encontrado: ${buscado.nombre}")
+    } else {
+        println("Producto no encontrado")
+    }
+
+    println("Eliminando Mouse Pad del carrito")
+    carrito.removeIf { it.nombre.equals("Mouse Pad", ignoreCase = true) }
+    println()
+
+    mostrarDetalle(carrito)
 
     val subtotal = calcularSubtotal(carrito)
     val igv = calcularIGV(subtotal)
