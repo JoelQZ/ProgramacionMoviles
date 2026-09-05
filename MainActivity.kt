@@ -101,8 +101,17 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Button(
                 onClick = {
+                    val precioNum = precio.toDoubleOrNull()
+                    val cantidadNum = cantidad.toIntOrNull()
+
                     if (nombre.isBlank() || precio.isBlank() || cantidad.isBlank()) {
-                        mensajeError = "Todos los campos son obligatorios"
+                        mensajeError = "Todos los campos son obligatorios."
+                        mostrarResumen = false
+                    } else if (precioNum == null || precioNum <= 0) {
+                        mensajeError = "Ingresa un precio válido mayor a 0."
+                        mostrarResumen = false
+                    } else if (cantidadNum == null || cantidadNum <= 0) {
+                        mensajeError = "Ingresa una cantidad entera mayor a 0."
                         mostrarResumen = false
                     } else {
                         mensajeError = ""
@@ -116,7 +125,7 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Button(
+            androidx.compose.material3.OutlinedButton(
                 onClick = {
                     nombre = ""
                     precio = ""
@@ -126,7 +135,7 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 },
                 modifier = Modifier.weight(1f)
             ) {
-                Text("LIMPIAR")
+                Text("Limpiar Campos")
             }
         }
 
