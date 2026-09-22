@@ -1,6 +1,7 @@
 package com.quijada.lab04carritotecsup
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,6 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
 
+val PurplePrimary = Color(0xFF6B52AC)
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaCarrito() {
@@ -51,9 +55,12 @@ fun PantallaCarrito() {
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
 
+    val subtotal = productos.sumOf { it.precio * it.cantidad }
+    val igv = subtotal * 0.18
+    val total = subtotal + igv
+
     Scaffold(
         topBar = {
-            val PurplePrimary = Color(0xFF6B52AC)
             TopAppBar(
                 title = {
                     Text(
@@ -112,7 +119,6 @@ fun PantallaCarrito() {
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            val PurplePrimary = Color(0xFF6B52AC)
             Button(
                 onClick = {
                     val precioNum = precio.toDoubleOrNull() ?: 0.0
@@ -142,17 +148,98 @@ fun PantallaCarrito() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            if (productos.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Tu carrito está vacío",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Agrega tu primer producto",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(productos) { producto ->
+                        TarjetaProducto(
+                            producto = producto,
+                            onEliminar = { productos.remove(producto) }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F2FA))
             ) {
-                items(productos) { producto ->
-                    TarjetaProducto(
-                        producto = producto,
-                        onEliminar = { productos.remove(producto) }
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Productos: ${productos.size}",
+                        color = Color.Gray,
+                        fontSize = 14.sp
                     )
+
+                    if (productos.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("Subtotal", fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                            Text("S/ ${String.format(Locale.US, "%.2f", subtotal)}")
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("IGV (18%)", fontWeight = FontWeight.Bold, color = Color.DarkGray)
+                            Text("S/ ${String.format(Locale.US, "%.2f", igv)}")
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+                    } else {
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "TOTAL",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "S/ ${String.format(Locale.US, "%.2f", total)}",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = PurplePrimary
+                        )
+                    }
                 }
             }
         }
@@ -186,7 +273,6 @@ fun TarjetaProducto(producto: Producto, onEliminar: () -> Unit) {
                 )
             }
 
-            val PurplePrimary = Color(0xFF6B52AC)
             Text(
                 text = "S/ ${String.format(Locale.US, "%.2f", importe)}",
                 style = MaterialTheme.typography.titleMedium,
