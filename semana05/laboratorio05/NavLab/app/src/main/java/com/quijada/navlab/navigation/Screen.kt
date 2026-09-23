@@ -1,7 +1,8 @@
 package com.quijada.navlab.navigation
 
-sealed class Screen(val route: String){
+sealed class Screen(val route: String) {
     object Home : Screen(route = "home")
+    object Welcome : Screen(route = "welcome")
     object List : Screen(route = "list")
     object Profile : Screen(route = "profile")
 

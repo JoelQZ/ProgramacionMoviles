@@ -10,6 +10,7 @@ import com.quijada.navlab.screens.DetailScreen
 import com.quijada.navlab.screens.HomeScreen
 import com.quijada.navlab.screens.ListScreen
 import com.quijada.navlab.screens.ProfileScreen
+import com.quijada.navlab.screens.WelcomeScreen
 
 @Composable
 fun AppNavigation() {
@@ -21,6 +22,9 @@ fun AppNavigation() {
     ) {
         composable(Screen.Home.route) {
             HomeScreen(navController)
+        }
+        composable(Screen.Welcome.route) {
+            WelcomeScreen(navController)
         }
         composable(Screen.List.route) {
             ListScreen(navController)
