@@ -110,7 +110,18 @@ fun DetailScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = onReservarClick,
+                onClick = {
+                    val nuevaReserva = Reserva(
+                        id = (DatosEjemplo.listaReservas.maxOfOrNull { it.id } ?: 0) + 1,
+                        nombreClase = clase.nombre,
+                        fechaHora = "${clase.categoria}, ${clase.horario}",
+                        sala = clase.sala,
+                        estado = "Confirmada"
+                    )
+                    DatosEjemplo.listaReservas.add(0, nuevaReserva)
+
+                    onReservarClick()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
