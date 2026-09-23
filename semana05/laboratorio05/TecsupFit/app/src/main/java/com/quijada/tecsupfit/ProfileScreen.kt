@@ -49,7 +49,7 @@ fun ProfileScreen() {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "DR",
+                text = "JQ",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF00695C)
@@ -59,7 +59,7 @@ fun ProfileScreen() {
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "Diego Ramos",
+            text = "Joel Quijada",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )

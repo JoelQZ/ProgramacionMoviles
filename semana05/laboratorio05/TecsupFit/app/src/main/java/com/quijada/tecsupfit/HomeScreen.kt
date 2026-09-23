@@ -63,7 +63,7 @@ fun HomeScreen(onClaseClick: (ClaseGimnasio) -> Unit = {}) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Hola, Diego",
+                    text = "Hola, Joel",
                     color = Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp
                 )
