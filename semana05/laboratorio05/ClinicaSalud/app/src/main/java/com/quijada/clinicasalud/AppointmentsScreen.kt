@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun AppointmentsScreen() {
-    var citasState by remember { mutableStateOf(Repository.citas.toList()) }
+    val citas = Repository.citas
 
     Column(
         modifier = Modifier
@@ -26,7 +26,7 @@ fun AppointmentsScreen() {
         Text("Mis Citas", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (citasState.isEmpty()) {
+        if (citas.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -35,7 +35,7 @@ fun AppointmentsScreen() {
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(citasState) { cita ->
+                items(citas, key = { it.id }) { cita ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -72,8 +72,7 @@ fun AppointmentsScreen() {
                                 if (cita.estado == "Confirmada") {
                                     TextButton(
                                         onClick = {
-                                            cita.estado = "Cancelada"
-                                            citasState = Repository.citas.toList()
+                                            Repository.citas.remove(cita)
                                         }
                                     ) {
                                         Text("Cancelar Cita", color = Color.Red)
