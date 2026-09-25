@@ -83,12 +83,25 @@ fun MainDrawerScreen() {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text(if (selectedScreen == "Inicio") "Clínica Salud+" else selectedScreen) },
+                    title = {
+                        Text(
+                            text = if (selectedScreen == "Inicio") "Clínica Salud+" else selectedScreen,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menú")
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menú",
+                                tint = Color.White
+                            )
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
                 )
             }
         ) { padding ->
@@ -98,7 +111,8 @@ fun MainDrawerScreen() {
                     .fillMaxSize()
             ) {
                 when (selectedScreen) {
-                    "Inicio" -> HomeScreen(onDoctorSelect = {})
+                    "Inicio" -> AppNavigation()
+                    "Mis citas" -> AppointmentsScreen()
                     else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Sección: $selectedScreen")
                     }
