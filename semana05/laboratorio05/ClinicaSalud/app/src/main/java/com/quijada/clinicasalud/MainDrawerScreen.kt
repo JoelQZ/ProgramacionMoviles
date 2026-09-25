@@ -77,6 +77,15 @@ fun MainDrawerScreen() {
                     },
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
+                NavigationDrawerItem(
+                    label = { Text("Asistente IA") },
+                    selected = selectedScreen == "Asistente IA",
+                    onClick = {
+                        selectedScreen = "Asistente IA"
+                        scope.launch { drawerState.close() }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
             }
         }
     ) {
@@ -113,6 +122,7 @@ fun MainDrawerScreen() {
                 when (selectedScreen) {
                     "Inicio" -> AppNavigation()
                     "Mis citas" -> AppointmentsScreen()
+                    "Asistente IA" -> AIChatScreen()
                     else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("Sección: $selectedScreen")
                     }
