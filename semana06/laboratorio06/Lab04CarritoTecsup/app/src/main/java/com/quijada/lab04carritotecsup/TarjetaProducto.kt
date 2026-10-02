@@ -1,11 +1,15 @@
 package com.quijada.lab04carritotecsup
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.OutlinedFlag
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,7 +19,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun TarjetaProducto(
-    producto: Producto
+    producto: Producto,
+    onFavoritoClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -74,18 +79,45 @@ fun TarjetaProducto(
             }
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(Color.White)
             ) {
                 DropdownMenuItem(
-                    text = { Text("Favoritos") },
+                    text = { Text("Favoritos", color = Color.DarkGray) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.FavoriteBorder,
+                            contentDescription = null,
+                            tint = Color.DarkGray
+                        )
+                    },
+                    onClick = {
+                        expanded = false
+                        onFavoritoClick()
+                    }
+                )
+                HorizontalDivider(color = Color(0xFFEEEEEE))
+                DropdownMenuItem(
+                    text = { Text("Compartir", color = Color.DarkGray) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.Share,
+                            contentDescription = null,
+                            tint = Color.DarkGray
+                        )
+                    },
                     onClick = { expanded = false }
                 )
+                HorizontalDivider(color = Color(0xFFEEEEEE))
                 DropdownMenuItem(
-                    text = { Text("Compartir") },
-                    onClick = { expanded = false }
-                )
-                DropdownMenuItem(
-                    text = { Text("Reportar") },
+                    text = { Text("Reportar", color = Color.DarkGray) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.OutlinedFlag,
+                            contentDescription = null,
+                            tint = Color.DarkGray
+                        )
+                    },
                     onClick = { expanded = false }
                 )
             }

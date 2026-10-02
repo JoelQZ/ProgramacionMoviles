@@ -178,7 +178,7 @@ fun PantallaCarrito() {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(productos) { producto ->
-                        TarjetaProducto(
+                        TarjetaProductoCarrito(
                             producto = producto,
                             onEliminar = { productos.remove(producto) }
                         )
@@ -247,7 +247,7 @@ fun PantallaCarrito() {
 }
 
 @Composable
-fun TarjetaProducto(producto: Producto, onEliminar: () -> Unit) {
+fun TarjetaProductoCarrito(producto: Producto, onEliminar: () -> Unit) {
     val importe = producto.precio * producto.cantidad
 
     Card(
