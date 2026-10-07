@@ -1,13 +1,15 @@
 package com.saludplus.citas.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.core.splashscreen.SplashScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.saludplus.citas.ui.screens.agendamiento.*
-import com.saludplus.citas.ui.screens.auth.*
+import com.saludplus.citas.ui.screens.auth.LoginScreen
+import com.saludplus.citas.ui.screens.auth.RegistroScreen
+import com.saludplus.citas.ui.screens.auth.SplashScreen
+import com.saludplus.citas.ui.screens.auth.TerminosScreen
 import com.saludplus.citas.ui.screens.citas.*
 import com.saludplus.citas.ui.screens.home.*
 import com.saludplus.citas.ui.screens.notificaciones.*

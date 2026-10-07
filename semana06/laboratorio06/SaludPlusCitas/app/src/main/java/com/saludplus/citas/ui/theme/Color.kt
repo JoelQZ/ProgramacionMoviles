@@ -2,10 +2,10 @@ package com.saludplus.citas.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val AzulPrincipal = Color(0xFF1E66E5)
+val AzulSecundario = Color(0xFF4A80F0)
+val AzulFondoSuave = Color(0xFFF2F6FE)
+val AzulGrisClaro = Color(0xFFE8EEFA)
+val VerdeDisponible = Color(0xFF00B074)
+val TextoOscuro = Color(0xFF1A1C1E)
+val TextoGris = Color(0xFF74777F)
