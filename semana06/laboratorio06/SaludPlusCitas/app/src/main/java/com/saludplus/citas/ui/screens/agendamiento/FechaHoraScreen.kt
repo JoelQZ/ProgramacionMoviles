@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +24,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.navigation.Rutas
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,8 +39,38 @@ fun FechaHoraScreen(
     val medico = Repositorio.obtenerMedicoPorId(medicoId)
     val context = LocalContext.current
 
-    var diaSeleccionado by remember { mutableStateOf(16) }
-    var horaSeleccionada by remember { mutableStateOf("09:30") }
+    var semanaOffset by remember { mutableStateOf(0L) }
+    var fechaSeleccionada by remember { mutableStateOf<LocalDate?>(null) }
+    var horaSeleccionada by remember { mutableStateOf("") }
+
+    val diasHabiles = remember(semanaOffset) {
+        val inicioBase = LocalDate.now().plusWeeks(semanaOffset)
+        var fechaLoop = if (semanaOffset == 0L) LocalDate.now() else inicioBase.with(DayOfWeek.MONDAY)
+        val lista = mutableListOf<LocalDate>()
+
+        while (lista.size < 5) {
+            if (fechaLoop.dayOfWeek != DayOfWeek.SATURDAY && fechaLoop.dayOfWeek != DayOfWeek.SUNDAY) {
+                if (fechaLoop >= LocalDate.now()) {
+                    lista.add(fechaLoop)
+                }
+            }
+            fechaLoop = fechaLoop.plusDays(1)
+        }
+        lista
+    }
+
+    LaunchedEffect(diasHabiles) {
+        if (fechaSeleccionada == null || fechaSeleccionada !in diasHabiles) {
+            fechaSeleccionada = diasHabiles.firstOrNull()
+            horaSeleccionada = ""
+        }
+    }
+
+    val mesAñoTexto = remember(diasHabiles) {
+        val primeraFecha = diasHabiles.firstOrNull() ?: LocalDate.now()
+        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale("es", "ES"))
+        primeraFecha.format(formatter).replaceFirstChar { it.uppercase() }
+    }
 
     Scaffold(
         topBar = {
@@ -70,28 +107,67 @@ fun FechaHoraScreen(
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-            Text("Setiembre 2026", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = { if (semanaOffset > 0) semanaOffset-- },
+                    enabled = semanaOffset > 0
+                ) {
+                    Icon(
+                        Icons.Default.ChevronLeft,
+                        contentDescription = "Semana anterior",
+                        tint = if (semanaOffset > 0) Color.Black else Color.LightGray
+                    )
+                }
+
+                Text(mesAñoTexto, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+                IconButton(onClick = { semanaOffset++ }) {
+                    Icon(Icons.Default.ChevronRight, contentDescription = "Semana siguiente")
+                }
+            }
+
             Spacer(modifier = Modifier.height(10.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                listOf(15, 16, 17, 18, 19).forEach { dia ->
-                    val esSeleccionado = dia == diaSeleccionado
+                diasHabiles.forEach { fecha ->
+                    val esSeleccionado = fecha == fechaSeleccionada
+                    val nombreDia = fecha.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale("es", "ES"))
+                        .replaceFirstChar { it.uppercase() }
+
                     Box(
                         modifier = Modifier
-                            .size(50.dp)
+                            .size(56.dp)
                             .background(
                                 if (esSeleccionado) Color(0xFF2563EB) else Color(0xFFF1F5F9),
                                 RoundedCornerShape(10.dp)
                             )
-                            .clickable { diaSeleccionado = dia },
+                            .clickable {
+                                fechaSeleccionada = fecha
+                                horaSeleccionada = ""
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("Día", fontSize = 10.sp, color = if (esSeleccionado) Color.White else Color.Gray)
-                            Text("$dia", fontWeight = FontWeight.Bold, color = if (esSeleccionado) Color.White else Color.Black)
+                            Text(
+                                text = nombreDia,
+                                fontSize = 10.sp,
+                                color = if (esSeleccionado) Color.White else Color.Gray,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = "${fecha.dayOfMonth}",
+                                fontWeight = FontWeight.Bold,
+                                color = if (esSeleccionado) Color.White else Color.Black,
+                                fontSize = 14.sp
+                            )
                         }
                     }
                 }
@@ -133,11 +209,13 @@ fun FechaHoraScreen(
 
             Button(
                 onClick = {
-                    val fechaFormateada = "$diaSeleccionado-09-2026"
-                    if (horaSeleccionada.isEmpty()) {
+                    if (fechaSeleccionada == null) {
+                        Toast.makeText(context, "Seleccione un día", Toast.LENGTH_SHORT).show()
+                    } else if (horaSeleccionada.isEmpty()) {
                         Toast.makeText(context, "Seleccione un horario", Toast.LENGTH_SHORT).show()
                     } else {
-                        navController.navigate(Rutas.ConfirmarCita.crearRuta(medicoId, fechaFormateada, horaSeleccionada))
+                        val fechaEnvio = fechaSeleccionada.toString()
+                        navController.navigate(Rutas.ConfirmarCita.crearRuta(medicoId, fechaEnvio, horaSeleccionada))
                     }
                 },
                 modifier = Modifier
