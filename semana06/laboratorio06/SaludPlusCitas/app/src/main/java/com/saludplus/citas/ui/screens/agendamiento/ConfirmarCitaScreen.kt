@@ -19,6 +19,9 @@ import androidx.navigation.NavController
 import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.navigation.Rutas
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,6 +34,16 @@ fun ConfirmarCitaScreen(
 ) {
     val medico = Repositorio.obtenerMedicoPorId(medicoId)
     var motivo by remember { mutableStateOf("Consulta de rutina") }
+
+    val fechaTextoEspanol = remember(fecha) {
+        try {
+            val fechaParsed = LocalDate.parse(fecha)
+            val formatter = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM 'de' yyyy", Locale("es", "ES"))
+            fechaParsed.format(formatter).replaceFirstChar { it.uppercase() }
+        } catch (e: Exception) {
+            fecha.ifEmpty { "Fecha no seleccionada" }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -77,7 +90,7 @@ fun ConfirmarCitaScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            CitaDetalleItem(Icons.Default.DateRange, "Fecha", fecha.ifEmpty { "16-09-2026" })
+            CitaDetalleItem(Icons.Default.DateRange, "Fecha", fechaTextoEspanol)
             CitaDetalleItem(Icons.Default.Schedule, "Hora", hora.ifEmpty { "10:00" })
             CitaDetalleItem(Icons.Default.MedicalServices, "Tipo de atención", "Consulta presencial")
             CitaDetalleItem(Icons.Default.LocationOn, "Dirección", "Av. Los Olivos 123, Lima")
@@ -102,7 +115,7 @@ fun ConfirmarCitaScreen(
                         medicoId = medicoId.ifEmpty { medico?.id ?: "m2" },
                         especialidadId = medico?.especialidadId ?: "1",
                         usuarioEmail = emailUsuario,
-                        fecha = fecha.ifEmpty { "16-09-2026" },
+                        fecha = fechaTextoEspanol,
                         hora = hora.ifEmpty { "10:00" },
                         direccion = "Av. Los Olivos 123, Lima",
                         motivo = motivo
