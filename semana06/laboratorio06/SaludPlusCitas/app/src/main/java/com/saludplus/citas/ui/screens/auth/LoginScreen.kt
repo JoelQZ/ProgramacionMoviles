@@ -65,10 +65,8 @@ fun LoginScreen(navController: NavHostController) {
                     } else {
                         val usuario = Repositorio.iniciarSesion(email, clave)
                         if (usuario != null) {
-                            Toast.makeText(context, "¡Bienvenido, ${usuario.nombre}!", Toast.LENGTH_SHORT).show()
-                            navController.navigate(Rutas.Home.ruta) {
-                                popUpTo(Rutas.Login.ruta) { inclusive = true }
-                            }
+                            Toast.makeText(context, "Código enviado a ${usuario.email}", Toast.LENGTH_SHORT).show()
+                            navController.navigate(Rutas.ConfirmacionLogin.ruta)
                         } else {
                             Toast.makeText(context, "Credenciales incorrectas", Toast.LENGTH_SHORT).show()
                         }

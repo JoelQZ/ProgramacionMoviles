@@ -24,16 +24,29 @@ fun AppNavigation(navController: NavHostController = rememberNavController()) {
     ) {
         composable(Rutas.Splash.ruta) { SplashScreen(navController) }
         composable(Rutas.Login.ruta) { LoginScreen(navController) }
+        composable(Rutas.ConfirmacionLogin.ruta) { ConfirmacionLoginScreen(navController) }
+
         composable(Rutas.Registro.ruta) { RegistroScreen(navController) }
         composable(Rutas.Terminos.ruta) { TerminosScreen(navController) }
 
         composable(Rutas.Home.ruta) { HomeScreen(navController) }
 
-        composable(Rutas.Especialidades.ruta) { EspecialidadesScreen(navController) }
+        composable(Rutas.Sedes.ruta) { SedesScreen(navController) }
+
+        composable(Rutas.Especialidades.ruta) {
+            EspecialidadesScreen(navController = navController, sedeFiltro = "")
+        }
+
+        composable("especialidades_sede/{sedeNombre}") { backStackEntry ->
+            val sedeNombre = backStackEntry.arguments?.getString("sedeNombre") ?: ""
+            EspecialidadesScreen(navController = navController, sedeFiltro = sedeNombre)
+        }
+
         composable(Rutas.Medicos.ruta) { backStackEntry ->
             val especialidadId = backStackEntry.arguments?.getString("especialidadId") ?: ""
             MedicosScreen(navController, especialidadId)
         }
+
         composable(Rutas.FechaHora.ruta) { backStackEntry ->
             val medicoId = backStackEntry.arguments?.getString("medicoId") ?: ""
             FechaHoraScreen(navController, medicoId)

@@ -5,14 +5,12 @@ plugins {
 
 android {
     namespace = "com.saludplus.citas"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.saludplus.citas"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 

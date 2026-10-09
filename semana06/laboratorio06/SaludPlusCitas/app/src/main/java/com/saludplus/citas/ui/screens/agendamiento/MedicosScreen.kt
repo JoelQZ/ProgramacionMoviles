@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.navigation.Rutas
+import com.saludplus.citas.ui.theme.AzulPrincipal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,17 +32,30 @@ fun MedicosScreen(
     navController: NavController,
     especialidadId: String
 ) {
-    val medicosDelRepo = Repositorio.medicos.filter {
-        it.especialidadId == especialidadId || especialidadId.isBlank()
+    val medicosAMostrar = Repositorio.medicos.filter { medico ->
+        if (especialidadId.startsWith("SEDE_") && especialidadId.contains("_ESP_")) {
+            val partes = especialidadId.split("_ESP_")
+            val sedeNombre = partes[0].removePrefix("SEDE_")
+            val espId = partes[1]
+            medico.sede.contains(sedeNombre, ignoreCase = true) && medico.especialidadId == espId
+        } else if (especialidadId.startsWith("SEDE_")) {
+            val sedeNombre = especialidadId.removePrefix("SEDE_")
+            medico.sede.contains(sedeNombre, ignoreCase = true)
+        } else if (especialidadId.isNotBlank() && especialidadId != "todas") {
+            medico.especialidadId == especialidadId
+        } else {
+            true
+        }
     }
 
-    val medicosAMostrar = if (medicosDelRepo.isNotEmpty()) {
-        medicosDelRepo
+    val tituloBarra = if (especialidadId.startsWith("SEDE_") && especialidadId.contains("_ESP_")) {
+        val partes = especialidadId.split("_ESP_")
+        "Médicos de ${partes[0].removePrefix("SEDE_")}"
+    } else if (especialidadId.startsWith("SEDE_")) {
+        "Médicos de ${especialidadId.removePrefix("SEDE_")}"
     } else {
-        Repositorio.medicos
+        "Médicos Disponibles"
     }
-
-    val tituloBarra = if (especialidadId.isNotBlank()) "Médicos Disponibles" else "Médicos Disponibles"
 
     Scaffold(
         topBar = {
@@ -60,7 +76,7 @@ fun MedicosScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No hay médicos disponibles por el momento", color = Color.Gray)
+                Text("No hay médicos disponibles para esta selección", color = Color.Gray)
             }
         } else {
             LazyColumn(
@@ -68,7 +84,7 @@ fun MedicosScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(medicosAMostrar) { medico ->
                     Card(
@@ -78,39 +94,56 @@ fun MedicosScreen(
                                 navController.navigate(Rutas.FechaHora.crearRuta(medico.id))
                             },
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        shape = RoundedCornerShape(12.dp)
+                        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .background(Color(0xFFE2E8F0), CircleShape),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                            }
+                                Box(
+                                    modifier = Modifier
+                                        .size(56.dp)
+                                        .background(Color(0xFFE2E8F0), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = null,
+                                        tint = AzulPrincipal,
+                                        modifier = Modifier.size(36.dp)
+                                    )
+                                }
 
-                            Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
 
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = medico.nombre,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp
-                                )
-                                Text(
-                                    text = "${medico.especialidadNombre} • CMP: ${medico.cmp}",
-                                    color = Color.Gray,
-                                    fontSize = 12.sp
-                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = medico.nombre,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 17.sp,
+                                        color = Color(0xFF1E293B)
+                                    )
+
+                                    Text(
+                                        text = "Especialidad: ${medico.especialidadNombre}",
+                                        color = AzulPrincipal,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 13.sp
+                                    )
+
+                                    Text(
+                                        text = "Código: ${medico.cmp}",
+                                        color = Color.Gray,
+                                        fontSize = 12.sp
+                                    )
+                                }
+
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.Star,
@@ -119,23 +152,66 @@ fun MedicosScreen(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
-                                        text = " ${medico.calificacion} (${medico.resenas})",
-                                        fontSize = 12.sp,
-                                        color = Color.Gray
+                                        text = " ${medico.calificacion}",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFF1E293B)
                                     )
                                 }
                             }
 
-                            Surface(
-                                color = Color(0xFFDCFCE7),
-                                shape = RoundedCornerShape(8.dp)
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 12.dp),
+                                color = Color(0xFFF1F5F9)
+                            )
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(bottom = 6.dp)
                             ) {
-                                Text(
-                                    text = "Disponible hoy",
-                                    color = Color(0xFF166534),
-                                    fontSize = 10.sp,
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                Icon(
+                                    imageVector = Icons.Default.LocationOn,
+                                    contentDescription = null,
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(16.dp)
                                 )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Sede: ${medico.sede}",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF475569)
+                                )
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(bottom = 12.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Call,
+                                    contentDescription = null,
+                                    tint = Color.Gray,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Teléfono: ${medico.telefono}",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF475569)
+                                )
+                            }
+
+                            Button(
+                                onClick = {
+                                    navController.navigate(Rutas.FechaHora.crearRuta(medico.id))
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = AzulPrincipal)
+                            ) {
+                                Text("Citar", fontSize = 14.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }

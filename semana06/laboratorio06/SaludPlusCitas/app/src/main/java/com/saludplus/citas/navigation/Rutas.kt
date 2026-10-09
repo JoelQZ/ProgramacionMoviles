@@ -3,10 +3,15 @@ package com.saludplus.citas.navigation
 sealed class Rutas(val ruta: String) {
     object Splash : Rutas("splash")
     object Login : Rutas("login")
+    object ConfirmacionLogin : Rutas("confirmacion_login")
     object Registro : Rutas("registro")
     object Terminos : Rutas("terminos")
     object Home : Rutas("home")
-    object Especialidades : Rutas("especialidades")
+    object Sedes : Rutas("sedes")
+
+    object Especialidades : Rutas("especialidades") {
+        fun crearRutaConSede(sedeNombre: String) = "especialidades_sede/$sedeNombre"
+    }
 
     object Medicos : Rutas("medicos/{especialidadId}") {
         fun crearRuta(especialidadId: String) = "medicos/$especialidadId"
