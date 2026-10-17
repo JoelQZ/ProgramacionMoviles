@@ -17,4 +17,7 @@ interface ServicioDao {
 
     @Query("SELECT * FROM servicios ORDER BY nombre ASC")
     fun obtenerTodos(): Flow<List<Servicio>>
+
+    @Query("SELECT * FROM servicios WHERE id = :id LIMIT 1")
+    suspend fun obtenerPorId(id: Int): Servicio?
 }
