@@ -7,4 +7,6 @@ object Rutas {
     const val PANEL_ADMIN = "panel_admin"
     const val SPLASH = "splash"
     const val DETALLE_PEDIDO = "detalle_pedido/{pedidoId}"
+    const val MIS_PEDIDOS = "mis_pedidos"
+    const val TARIFAS = "tarifas"
 }
