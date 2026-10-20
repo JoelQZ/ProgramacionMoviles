@@ -9,4 +9,6 @@ object Rutas {
     const val DETALLE_PEDIDO = "detalle_pedido/{pedidoId}"
     const val MIS_PEDIDOS = "mis_pedidos"
     const val TARIFAS = "tarifas"
+    const val BANDEJA_PEDIDOS = "bandeja_pedidos"
+    const val GESTION_PEDIDO = "gestion_pedido/{pedidoId}"
 }

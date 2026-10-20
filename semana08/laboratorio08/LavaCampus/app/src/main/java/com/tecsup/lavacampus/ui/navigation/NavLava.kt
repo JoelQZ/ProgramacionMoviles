@@ -16,6 +16,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.Rol
+import com.tecsup.lavacampus.ui.administrador.BandejaScreen
+import com.tecsup.lavacampus.ui.administrador.GestionPedidoScreen
 import com.tecsup.lavacampus.ui.administrador.PanelScreen
 import com.tecsup.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.InicioScreen
@@ -24,7 +26,9 @@ import com.tecsup.lavacampus.ui.estudiante.MisPedidosScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.TarifasScreen
 import com.tecsup.lavacampus.ui.theme.ColorEstudiante
+import com.tecsup.lavacampus.viewmodel.BandejaViewModel
 import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
+import com.tecsup.lavacampus.viewmodel.GestionPedidoViewModel
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.MisPedidosViewModel
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
@@ -110,7 +114,64 @@ fun NavLava(
 
             PanelScreen(
                 viewModel = panelViewModel,
-                onVerPedidosListos = { }
+                onVerPedidosListos = {
+                    navController.navigate(Rutas.BANDEJA_PEDIDOS)
+                },
+                onNavegarTab = { ruta ->
+                    if (ruta != Rutas.PANEL_ADMIN) {
+                        navController.navigate(ruta) {
+                            popUpTo(Rutas.PANEL_ADMIN)
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            )
+        }
+
+        composable(Rutas.BANDEJA_PEDIDOS) {
+            val bandejaViewModel: BandejaViewModel = viewModel(
+                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                        return BandejaViewModel(repository) as T
+                    }
+                }
+            )
+
+            BandejaScreen(
+                viewModel = bandejaViewModel,
+                onVerGestionPedido = { id ->
+                    navController.navigate("gestion_pedido/$id")
+                },
+                onNavegarTab = { ruta ->
+                    if (ruta != Rutas.BANDEJA_PEDIDOS) {
+                        navController.navigate(ruta) {
+                            popUpTo(Rutas.PANEL_ADMIN)
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Rutas.GESTION_PEDIDO,
+            arguments = listOf(navArgument("pedidoId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val pedidoId = backStackEntry.arguments?.getInt("pedidoId") ?: return@composable
+
+            val gestionViewModel: GestionPedidoViewModel = viewModel(
+                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                        return GestionPedidoViewModel(repository, pedidoId) as T
+                    }
+                }
+            )
+
+            GestionPedidoScreen(
+                viewModel = gestionViewModel,
+                onVolver = { navController.popBackStack() }
             )
         }
 
