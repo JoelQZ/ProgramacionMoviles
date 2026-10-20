@@ -4,44 +4,41 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
+import com.tecsup.lavacampus.data.prefs.PreferenciasStore
+import com.tecsup.lavacampus.data.repository.LavaRepositoryRoom
+import com.tecsup.lavacampus.ui.navigation.NavLava
 import com.tecsup.lavacampus.ui.theme.LavaCampusTheme
+import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
+import com.tecsup.lavacampus.viewmodel.SesionViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val app = application as LavaApp
+        val repository = LavaRepositoryRoom(app.database)
+        val prefs = PreferenciasStore(this)
+        val factory = LavaViewModelFactory(repository, prefs)
+
         setContent {
             LavaCampusTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                MainContent(factory = factory)
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+private fun MainContent(factory: LavaViewModelFactory) {
+    val navController = rememberNavController()
+    val sesionViewModel: SesionViewModel = viewModel(factory = factory)
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    LavaCampusTheme {
-        Greeting("Android")
-    }
+    NavLava(
+        navController = navController,
+        sesionViewModel = sesionViewModel
+    )
 }
