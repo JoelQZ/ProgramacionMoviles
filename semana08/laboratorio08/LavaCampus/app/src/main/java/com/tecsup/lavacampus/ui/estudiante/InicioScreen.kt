@@ -139,14 +139,14 @@ fun InicioScreen(
 
         item {
             Button(
-                onClick = onNuevoPedido,
+                onClick = { onNuevoPedido() },
+                colors = ButtonDefaults.buttonColors(containerColor = ColorEstudiante),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ColorEstudiante)
+                    .height(50.dp),
+                shape = RoundedCornerShape(25.dp)
             ) {
-                Text("Nuevo pedido", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(text = "Nuevo pedido", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
 
