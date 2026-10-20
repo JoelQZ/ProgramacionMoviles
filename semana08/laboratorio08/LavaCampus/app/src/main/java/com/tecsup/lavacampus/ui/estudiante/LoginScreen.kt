@@ -42,177 +42,188 @@ fun LoginScreen(
 
     val colorFondoPractica = if (rolSeleccionado == Rol.ADMIN) Color(0xFFF3EDF7) else Color(0xFFF0F8FA)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.Center
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.White
     ) {
-        Text(
-            text = "Bienvenido",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = "Ingresa para continuar",
-            fontSize = 14.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
-
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFFF3F4F6))
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(if (rolSeleccionado == Rol.CLIENTE) ColorEstudiante else Color.Transparent)
-                    .clickable {
-                        rolSeleccionado = Rol.CLIENTE
-                        viewModel.limpiarError()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Estudiante",
-                    color = if (rolSeleccionado == Rol.CLIENTE) Color.White else Color.Gray,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(if (rolSeleccionado == Rol.ADMIN) ColorAdministrador else Color.Transparent)
-                    .clickable {
-                        rolSeleccionado = Rol.ADMIN
-                        viewModel.limpiarError()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Administrador",
-                    color = if (rolSeleccionado == Rol.ADMIN) Color.White else Color.Gray,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = correo,
-            onValueChange = {
-                correo = it
-                viewModel.limpiarError()
-            },
-            label = { Text("Correo") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = colorRol) },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = clave,
-            onValueChange = {
-                clave = it
-                viewModel.limpiarError()
-            },
-            label = { Text("Contraseña") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = colorRol) },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.CenterEnd
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "¿Olvidaste tu contraseña?",
-                color = colorRol,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.clickable { /* Acción opcional */ }
+                text = "Bienvenido",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold
             )
-        }
-
-        if (error != null) {
             Text(
-                text = error!!,
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 8.dp)
+                text = "Ingresa para continuar",
+                fontSize = 14.sp,
+                color = Color.Gray,
+                modifier = Modifier.padding(bottom = 24.dp)
             )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                viewModel.login(correo, clave, rolSeleccionado, onLoginExitoso)
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = colorRol),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(25.dp)
-        ) {
-            Text(text = "Ingresar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-
-        if (rolSeleccionado == Rol.CLIENTE) {
-            Spacer(modifier = Modifier.height(16.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color(0xFFF3F4F6))
+                    .padding(4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "¿No tienes cuenta? ", color = Color.Gray, fontSize = 13.sp)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(if (rolSeleccionado == Rol.CLIENTE) ColorEstudiante else Color.Transparent)
+                        .clickable {
+                            if (rolSeleccionado != Rol.CLIENTE) {
+                                rolSeleccionado = Rol.CLIENTE
+                                correo = "joel.quijada@tecsup.edu.pe"
+                                clave = "123456"
+                                viewModel.limpiarError()
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Estudiante",
+                        color = if (rolSeleccionado == Rol.CLIENTE) Color.White else Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(if (rolSeleccionado == Rol.ADMIN) ColorAdministrador else Color.Transparent)
+                        .clickable {
+                            if (rolSeleccionado != Rol.ADMIN) {
+                                rolSeleccionado = Rol.ADMIN
+                                correo = "facundo.zevallos@admin.com"
+                                clave = "12345"
+                                viewModel.limpiarError()
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Administrador",
+                        color = if (rolSeleccionado == Rol.ADMIN) Color.White else Color.Gray,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            OutlinedTextField(
+                value = correo,
+                onValueChange = {
+                    correo = it
+                    viewModel.limpiarError()
+                },
+                label = { Text("Correo") },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = colorRol) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = clave,
+                onValueChange = {
+                    clave = it
+                    viewModel.limpiarError()
+                },
+                label = { Text("Contraseña") },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = colorRol) },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
                 Text(
-                    text = "Regístrate",
+                    text = "¿Olvidaste tu contraseña?",
                     color = colorRol,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    modifier = Modifier.clickable { /* Acción registrar */ }
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
-        }
 
-        if (rolSeleccionado == Rol.ADMIN) {
-            Spacer(modifier = Modifier.height(20.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = colorFondoPractica)
+            if (error != null) {
+                Text(
+                    text = error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    viewModel.login(correo, clave, rolSeleccionado, onLoginExitoso)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = colorRol),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(25.dp)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = "Ingresar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+
+            if (rolSeleccionado == Rol.CLIENTE) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "¿No tienes cuenta? ", color = Color.Gray, fontSize = 13.sp)
                     Text(
-                        text = "Modo práctica",
-                        fontWeight = FontWeight.Bold,
+                        text = "Regístrate",
                         color = colorRol,
-                        fontSize = 14.sp
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Puedes cambiar de perfil desde Ajustes para probar ambos roles.",
-                        color = Color.Gray,
-                        fontSize = 12.sp
-                    )
+                }
+            }
+
+            if (rolSeleccionado == Rol.ADMIN) {
+                Spacer(modifier = Modifier.height(20.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = colorFondoPractica)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Modo práctica",
+                            fontWeight = FontWeight.Bold,
+                            color = colorRol,
+                            fontSize = 14.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Puedes cambiar de perfil desde Ajustes para probar ambos roles.",
+                            color = Color.Gray,
+                            fontSize = 12.sp
+                        )
+                    }
                 }
             }
         }

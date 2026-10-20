@@ -16,10 +16,38 @@ object DatosIniciales {
             val hace3Dias = LocalDate.now().minusDays(3).toString()
 
             val usuarios = listOf(
-                Usuario(id = 1, nombre = "Administrador", codigo = "", correo = "admin@lavacampus.pe", clave = "admin123", rol = Rol.ADMIN.name),
-                Usuario(id = 2, nombre = "Juan Pérez", codigo = "20230001", correo = "juan.perez@tecsup.edu.pe", clave = "123456", rol = Rol.CLIENTE.name),
-                Usuario(id = 3, nombre = "Maria López", codigo = "20230002", correo = "maria.lopez@tecsup.edu.pe", clave = "123456", rol = Rol.CLIENTE.name),
-                Usuario(id = 4, nombre = "Joel Quijada", codigo = "20230003", correo = "joel.quijada@tecsup.edu.pe", clave = "123456", rol = Rol.CLIENTE.name)
+                Usuario(
+                    id = 1,
+                    nombre = "Facundo Zevallos",
+                    codigo = "ADM001",
+                    correo = "facundo.zevallos@admin.com",
+                    clave = "12345",
+                    rol = Rol.ADMIN.name
+                ),
+                Usuario(
+                    id = 2,
+                    nombre = "Juan Pérez",
+                    codigo = "20230001",
+                    correo = "juan.perez@tecsup.edu.pe",
+                    clave = "123456",
+                    rol = Rol.CLIENTE.name
+                ),
+                Usuario(
+                    id = 3,
+                    nombre = "Maria López",
+                    codigo = "20230002",
+                    correo = "maria.lopez@tecsup.edu.pe",
+                    clave = "123456",
+                    rol = Rol.CLIENTE.name
+                ),
+                Usuario(
+                    id = 4,
+                    nombre = "Joel Quijada",
+                    codigo = "20230003",
+                    correo = "joel.quijada@tecsup.edu.pe",
+                    clave = "123456",
+                    rol = Rol.CLIENTE.name
+                )
             )
             db.usuarioDao().insertarTodos(usuarios)
 
