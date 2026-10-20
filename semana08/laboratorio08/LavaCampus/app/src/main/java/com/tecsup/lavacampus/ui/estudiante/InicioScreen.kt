@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +28,7 @@ import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.model.EstadoPedido
 import com.tecsup.lavacampus.ui.theme.ColorEstudiante
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
+import java.util.Locale
 
 @Composable
 fun InicioScreen(
@@ -72,7 +74,11 @@ fun InicioScreen(
 
         item {
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(enabled = pedidoActivo != null) {
+                        pedidoActivo?.let { onVerDetallePedido(it.pedido.id.toLong()) }
+                    },
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = ColorEstudiante)
             ) {
@@ -80,7 +86,7 @@ fun InicioScreen(
                     if (pedidoActivo != null) {
                         val p = pedidoActivo!!
                         val estadoEnum = try {
-                            EstadoPedido.valueOf(p.pedido.estado)
+                            EstadoPedido.valueOf(p.pedido.estado.uppercase())
                         } catch (e: Exception) {
                             EstadoPedido.RECIBIDO
                         }
@@ -283,7 +289,16 @@ private fun PedidoCardLocal(
         ) {
             Column {
                 Text("Pedido #${p.id.toString().padStart(3, '0')}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Text("${p.fechaRegistro}", color = Color.Gray, fontSize = 12.sp)
+                val fechaTexto = remember(p.fechaCreacion) {
+                    try {
+                        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                        sdf.format(java.util.Date(p.fechaCreacion))
+                    } catch (e: Exception) {
+                        p.fechaCreacion.toString()
+                    }
+                }
+
+                Text(text = fechaTexto, color = Color.Gray, fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(4.dp))
                 Surface(
                     shape = RoundedCornerShape(12.dp),
@@ -298,7 +313,12 @@ private fun PedidoCardLocal(
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text("S/ ${String.format("%.2f", p.total)}", fontWeight = FontWeight.Bold, color = ColorEstudiante, fontSize = 16.sp)
+                Text(
+                    text = String.format(Locale.US, "S/ %.2f", p.total),
+                    fontWeight = FontWeight.Bold,
+                    color = ColorEstudiante,
+                    fontSize = 16.sp
+                )
                 if (!p.casillero.isNullOrEmpty()) {
                     Text("Casillero ${p.casillero}", fontSize = 11.sp, color = ColorEstudiante, fontWeight = FontWeight.Bold)
                 }
