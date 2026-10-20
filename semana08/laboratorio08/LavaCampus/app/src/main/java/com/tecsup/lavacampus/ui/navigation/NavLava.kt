@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.Rol
+import com.tecsup.lavacampus.ui.administrador.PanelScreen
 import com.tecsup.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
@@ -27,6 +28,7 @@ import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.MisPedidosViewModel
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
+import com.tecsup.lavacampus.viewmodel.PanelViewModel
 import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
 
@@ -94,6 +96,22 @@ fun NavLava(
                     CircularProgressIndicator(color = ColorEstudiante)
                 }
             }
+        }
+
+        composable(Rutas.PANEL_ADMIN) {
+            val panelViewModel: PanelViewModel = viewModel(
+                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                        return PanelViewModel(repository) as T
+                    }
+                }
+            )
+
+            PanelScreen(
+                viewModel = panelViewModel,
+                onVerPedidosListos = { }
+            )
         }
 
         composable(Rutas.NUEVO_PEDIDO) {
