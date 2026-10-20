@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class SesionViewModel(
     private val repository: LavaRepository,
@@ -32,16 +33,31 @@ class SesionViewModel(
         }
 
         viewModelScope.launch {
-            val usuario = repository.login(correo.trim(), clave.trim())
-            if (usuario == null) {
-                _error.value = "Correo o contraseña incorrectos"
-            } else if (usuario.rol != rolSeleccionado.name) {
-                _error.value = "El usuario no corresponde al rol de ${rolSeleccionado.name.lowercase().capitalize()}"
-            } else {
-                _error.value = null
-                _usuarioActual.value = usuario
-                prefs.guardarSesion(usuario.rol, usuario.id)
-                onSuccess(usuario.rol)
+            try {
+                val usuario = repository.login(correo.trim(), clave.trim())
+                if (usuario == null) {
+                    _error.value = "Correo o contraseña incorrectos"
+                    return@launch
+                }
+
+                val rolUsuarioUpper = usuario.rol.uppercase()
+                val rolCoincide = when (rolSeleccionado) {
+                    Rol.CLIENTE -> rolUsuarioUpper == "CLIENTE" || rolUsuarioUpper == "ESTUDIANTE"
+                    Rol.ADMIN -> rolUsuarioUpper == "ADMIN" || rolUsuarioUpper == "ADMINISTRADOR"
+                }
+
+                if (!rolCoincide) {
+                    val nombreRol = if (rolSeleccionado == Rol.CLIENTE) "Estudiante" else "Administrador"
+                    _error.value = "El usuario no corresponde al rol de $nombreRol"
+                } else {
+                    _error.value = null
+                    _usuarioActual.value = usuario
+                    prefs.guardarSesion(usuario.rol, usuario.id)
+                    onSuccess(usuario.rol)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _error.value = "Error al iniciar sesión: ${e.localizedMessage}"
             }
         }
     }

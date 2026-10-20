@@ -29,8 +29,9 @@ fun LoginScreen(
     onLoginExitoso: (String) -> Unit
 ) {
     var rolSeleccionado by remember { mutableStateOf(Rol.CLIENTE) }
-    var correo by remember { mutableStateOf("") }
-    var clave by remember { mutableStateOf("") }
+
+    var correo by remember { mutableStateOf("joel.quijada@tecsup.edu.pe") }
+    var clave by remember { mutableStateOf("123456") }
 
     val error by viewModel.error.collectAsState()
 
