@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecsup.lavacampus.model.EstadoPedido
-import com.tecsup.lavacampus.ui.theme.ColorEstudiante
+import com.tecsup.lavacampus.ui.theme.ColorAdministrador
 
 @Composable
 fun StepperEstado(
@@ -44,7 +44,7 @@ fun StepperEstado(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        etapas.forEachIndexed { index, (estado, titulo) ->
+        etapas.forEachIndexed { index, (_, titulo) ->
             val completado = indiceActual >= index
             val esUltimo = index == etapas.lastIndex
 
@@ -60,10 +60,10 @@ fun StepperEstado(
                         modifier = Modifier
                             .size(24.dp)
                             .clip(CircleShape)
-                            .background(if (completado) ColorEstudiante else Color.White)
+                            .background(if (completado) ColorAdministrador else Color.White)
                             .border(
                                 width = 2.dp,
-                                color = if (completado) ColorEstudiante else Color.LightGray,
+                                color = if (completado) ColorAdministrador else Color.LightGray,
                                 shape = CircleShape
                             ),
                         contentAlignment = Alignment.Center
@@ -83,7 +83,7 @@ fun StepperEstado(
                             modifier = Modifier
                                 .width(2.dp)
                                 .height(32.dp)
-                                .background(if (indiceActual > index) ColorEstudiante else Color.LightGray)
+                                .background(if (indiceActual > index) ColorAdministrador else Color.LightGray)
                         )
                     }
                 }

@@ -170,6 +170,10 @@ fun PanelScreen(
                     }
                 }
             }
+
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 }
@@ -218,11 +222,14 @@ private fun BarraInferiorAdministrador(
             )
         )
         NavigationBarItem(
-            selected = false,
-            onClick = { },
+            selected = rutaSeleccionada == Rutas.BANDEJA_PEDIDOS,
+            onClick = { onNavegar(Rutas.BANDEJA_PEDIDOS) },
             icon = { Icon(Icons.Default.ListAlt, contentDescription = "Pedidos") },
             label = { Text("Pedidos", fontSize = 10.sp) },
             colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorAdministrador,
+                selectedTextColor = ColorAdministrador,
+                indicatorColor = Color(0xFFF3EDF7),
                 unselectedIconColor = Color.Gray,
                 unselectedTextColor = Color.Gray
             )
