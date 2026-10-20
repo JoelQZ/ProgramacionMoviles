@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
+import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.data.repository.LavaRepositoryRoom
 import com.tecsup.lavacampus.ui.navigation.NavLava
 import com.tecsup.lavacampus.ui.theme.LavaCampusTheme
@@ -26,19 +27,20 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             LavaCampusTheme {
-                MainContent(factory = factory)
+                MainContent(factory = factory, repository = repository)
             }
         }
     }
 }
 
 @Composable
-private fun MainContent(factory: LavaViewModelFactory) {
+private fun MainContent(factory: LavaViewModelFactory, repository: LavaRepository) {
     val navController = rememberNavController()
     val sesionViewModel: SesionViewModel = viewModel(factory = factory)
 
     NavLava(
         navController = navController,
-        sesionViewModel = sesionViewModel
+        sesionViewModel = sesionViewModel,
+        repository = repository
     )
 }
