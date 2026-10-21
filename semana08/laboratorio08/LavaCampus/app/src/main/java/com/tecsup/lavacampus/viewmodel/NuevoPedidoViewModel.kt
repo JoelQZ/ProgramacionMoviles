@@ -39,11 +39,36 @@ class NuevoPedidoViewModel(
     private val _mensajeError = MutableStateFlow<String?>(null)
     val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
 
-    val total: StateFlow<Double> = combine(serviciosActivos, cantidades) { servicios, mapCantidades ->
+    val subtotal: StateFlow<Double> = combine(serviciosActivos, cantidades) { servicios, mapCantidades ->
         servicios.sumOf { servicio ->
             val cant = mapCantidades[servicio.id] ?: 0.0
             cant * servicio.precio
         }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0.0
+    )
+
+    val totalKilos: StateFlow<Double> = combine(serviciosActivos, cantidades) { servicios, mapCantidades ->
+        servicios.filter { it.unidad.equals("KG", ignoreCase = true) }
+            .sumOf { mapCantidades[it.id] ?: 0.0 }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0.0
+    )
+
+    val descuento: StateFlow<Double> = combine(subtotal, totalKilos) { sub, kg ->
+        if (kg > 5.0) sub * 0.10 else 0.0
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0.0
+    )
+
+    val total: StateFlow<Double> = combine(subtotal, descuento) { sub, desc ->
+        (sub - desc).coerceAtLeast(0.0)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -124,7 +149,8 @@ class NuevoPedidoViewModel(
                 usuarioId = usuario.id,
                 lineas = lineas,
                 fechaEntrega = fechaStr,
-                nota = _nota.value
+                nota = _nota.value,
+                descuento = descuento.value
             )
 
             onExito()

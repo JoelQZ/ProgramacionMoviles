@@ -40,6 +40,8 @@ fun NuevoPedidoScreen(
     val servicios by viewModel.serviciosActivos.collectAsState()
     val cantidades by viewModel.cantidades.collectAsState()
     val nota by viewModel.nota.collectAsState()
+    val subtotal by viewModel.subtotal.collectAsState()
+    val descuento by viewModel.descuento.collectAsState()
     val total by viewModel.total.collectAsState()
     val fechaEstimada by viewModel.fechaEntregaEstimada.collectAsState()
     val errorMsg by viewModel.mensajeError.collectAsState()
@@ -155,10 +157,28 @@ fun NuevoPedidoScreen(
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
 
+                                if (descuento > 0.0) {
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 10.dp),
+                                        shape = RoundedCornerShape(10.dp),
+                                        color = Color(0xFFDCFCE7)
+                                    ) {
+                                        Text(
+                                            text = "🎉 ¡10% de descuento aplicado por superar los 5 kg!",
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF15803D),
+                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                        )
+                                    }
+                                }
+
                                 servicios.forEach { s ->
                                     val cant = cantidades[s.id] ?: 0.0
                                     if (cant > 0.0) {
-                                        val subtotal = cant * s.precio
+                                        val itemSubtotal = cant * s.precio
                                         val esKg = s.unidad.equals("KG", ignoreCase = true)
 
                                         val textoCant = if (esKg) {
@@ -187,12 +207,58 @@ fun NuevoPedidoScreen(
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
-                                                String.format(Locale.US, "S/ %.2f", subtotal),
+                                                String.format(Locale.US, "S/ %.2f", itemSubtotal),
                                                 fontSize = 13.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = MaterialTheme.colorScheme.onSurface
                                             )
                                         }
+                                    }
+                                }
+
+                                if (descuento > 0.0) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(vertical = 8.dp),
+                                        color = MaterialTheme.colorScheme.outlineVariant
+                                    )
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 2.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "Subtotal",
+                                            fontSize = 13.sp,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            String.format(Locale.US, "S/ %.2f", subtotal),
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 2.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            "Descuento 10% (>5 kg)",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color(0xFF16A34A)
+                                        )
+                                        Text(
+                                            String.format(Locale.US, "-S/ %.2f", descuento),
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF16A34A)
+                                        )
                                     }
                                 }
 

@@ -28,6 +28,7 @@ data class Pedido(
     val fechaEntrega: String,
     val estado: String,
     val total: Double,
+    val descuento: Double = 0.0,
     val casillero: String? = null,
     val pagado: Boolean = false,
     val nota: String = "",

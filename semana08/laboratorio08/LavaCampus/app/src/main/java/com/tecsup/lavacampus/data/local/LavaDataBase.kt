@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
         Pedido::class,
         DetallePedido::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class LavaDatabase : RoomDatabase() {
@@ -45,6 +45,7 @@ abstract class LavaDatabase : RoomDatabase() {
                     LavaDatabase::class.java,
                     "lavacampus.db"
                 )
+                    .fallbackToDestructiveMigration()
                     .addCallback(LavaDatabaseCallback())
                     .build()
 
@@ -54,7 +55,7 @@ abstract class LavaDatabase : RoomDatabase() {
         }
     }
 
-    private class LavaDatabaseCallback : RoomDatabase.Callback() {
+    private class LavaDatabaseCallback : Callback() {
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             INSTANCE?.let { database ->
