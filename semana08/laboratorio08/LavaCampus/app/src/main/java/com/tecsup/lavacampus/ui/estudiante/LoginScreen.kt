@@ -40,11 +40,9 @@ fun LoginScreen(
         label = "ColorRol"
     )
 
-    val colorFondoPractica = if (rolSeleccionado == Rol.ADMIN) Color(0xFFF3EDF7) else Color(0xFFF0F8FA)
-
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.White
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -56,12 +54,13 @@ fun LoginScreen(
             Text(
                 text = "Bienvenido",
                 fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Text(
                 text = "Ingresa para continuar",
                 fontSize = 14.sp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
@@ -70,7 +69,7 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(48.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(Color(0xFFF3F4F6))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -92,7 +91,7 @@ fun LoginScreen(
                 ) {
                     Text(
                         text = "Estudiante",
-                        color = if (rolSeleccionado == Rol.CLIENTE) Color.White else Color.Gray,
+                        color = if (rolSeleccionado == Rol.CLIENTE) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -115,7 +114,7 @@ fun LoginScreen(
                 ) {
                     Text(
                         text = "Administrador",
-                        color = if (rolSeleccionado == Rol.ADMIN) Color.White else Color.Gray,
+                        color = if (rolSeleccionado == Rol.ADMIN) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -193,7 +192,7 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(text = "¿No tienes cuenta? ", color = Color.Gray, fontSize = 13.sp)
+                    Text(text = "¿No tienes cuenta? ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                     Text(
                         text = "Regístrate",
                         color = colorRol,
@@ -208,7 +207,9 @@ fun LoginScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = colorFondoPractica)
+                    colors = CardDefaults.cardColors(
+                        containerColor = colorRol.copy(alpha = 0.12f)
+                    )
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
@@ -220,7 +221,7 @@ fun LoginScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Puedes cambiar de perfil desde Ajustes para probar ambos roles.",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp
                         )
                     }

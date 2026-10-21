@@ -10,7 +10,8 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class BandejaViewModel(
-    private val repository: LavaRepository
+    private val repository: LavaRepository,
+    private val usuarioIdInicial: Int? = null
 ) : ViewModel() {
 
     val textoBusqueda = MutableStateFlow("")
@@ -27,6 +28,12 @@ class BandejaViewModel(
             val p = item.pedido
             val u = item.usuario
 
+            val cumpleUsuario = if (usuarioIdInicial != null && usuarioIdInicial > 0) {
+                p.usuarioId == usuarioIdInicial
+            } else {
+                true
+            }
+
             val cumpleEstado = when (estado) {
                 "Todos" -> true
                 else -> p.estado.equals(estado, ignoreCase = true)
@@ -40,7 +47,7 @@ class BandejaViewModel(
                     numPedidoStr.contains(query) ||
                     nombreEstudiante.contains(query)
 
-            cumpleEstado && cumpleBusqueda
+            cumpleUsuario && cumpleEstado && cumpleBusqueda
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
@@ -26,7 +28,9 @@ class MainActivity : ComponentActivity() {
         val factory = LavaViewModelFactory(repository, prefs)
 
         setContent {
-            LavaCampusTheme {
+            val esModoOscuro by prefs.modoOscuro.collectAsState(initial = false)
+
+            LavaCampusTheme(darkTheme = esModoOscuro) {
                 MainContent(factory = factory, repository = repository)
             }
         }

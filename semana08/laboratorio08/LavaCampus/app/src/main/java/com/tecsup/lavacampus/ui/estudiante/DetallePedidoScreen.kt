@@ -1,10 +1,13 @@
 package com.tecsup.lavacampus.ui.estudiante
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocalLaundryService
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +21,27 @@ import com.tecsup.lavacampus.ui.components.EstadoPedidoChip
 import com.tecsup.lavacampus.ui.components.StepperEstado
 import com.tecsup.lavacampus.ui.theme.ColorEstudiante
 import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+
+private fun formatearFechaLegible(milisegundos: Long): String {
+    return try {
+        val sdf = SimpleDateFormat("EEE d MMM", Locale("es", "ES"))
+        sdf.format(Date(milisegundos))
+    } catch (e: Exception) {
+        "Reciente"
+    }
+}
+
+private fun formatearHoraPaso(milisegundos: Long): String {
+    return try {
+        val sdf = SimpleDateFormat("d MMM HH:mm", Locale("es", "ES"))
+        sdf.format(Date(milisegundos))
+    } catch (e: Exception) {
+        "20 oct 10:15"
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,19 +62,24 @@ fun DetallePedidoScreen(
                             text = "Pedido #${pedidoConDetalle?.pedido?.id?.let { String.format(Locale.US, "%03d", it) } ?: ""}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(end = 48.dp)
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         val item = pedidoConDetalle
 
@@ -71,6 +99,16 @@ fun DetallePedidoScreen(
                 EstadoPedido.RECIBIDO
             }
 
+            val fechaLegible = formatearFechaLegible(item.pedido.fechaCreacion)
+            val horaPaso1 = formatearHoraPaso(item.pedido.fechaCreacion)
+
+            val fechasMap = mapOf(
+                EstadoPedido.RECIBIDO to horaPaso1,
+                EstadoPedido.EN_PROCESO to if (estadoEnum == EstadoPedido.EN_PROCESO || estadoEnum == EstadoPedido.LISTO || estadoEnum == EstadoPedido.ENTREGADO) horaPaso1 else "Pendiente",
+                EstadoPedido.LISTO to if (estadoEnum == EstadoPedido.LISTO || estadoEnum == EstadoPedido.ENTREGADO) horaPaso1 else "Pendiente",
+                EstadoPedido.ENTREGADO to if (estadoEnum == EstadoPedido.ENTREGADO) horaPaso1 else "Pendiente"
+            )
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -85,29 +123,47 @@ fun DetallePedidoScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC))
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                Surface(
+                                    modifier = Modifier.size(48.dp),
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = ColorEstudiante.copy(alpha = 0.15f)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Default.LocalLaundryService,
+                                            contentDescription = null,
+                                            tint = ColorEstudiante,
+                                            modifier = Modifier.size(26.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(14.dp))
+
                                 Column {
                                     Text(
-                                        text = "Registrado el ${item.pedido.fechaCreacion}",
+                                        text = "Registrado el $fechaLegible",
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Spacer(modifier = Modifier.height(2.dp))
                                     Text(
                                         text = "Entrega estimada: ${item.pedido.fechaEntrega}",
                                         fontSize = 12.sp,
-                                        color = Color.Gray
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    EstadoPedidoChip(estado = estadoEnum)
                                 }
-                                EstadoPedidoChip(estado = estadoEnum)
                             }
                         }
                     }
@@ -116,53 +172,99 @@ fun DetallePedidoScreen(
                         Text(
                             text = "Seguimiento",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        StepperEstado(estadoActual = estadoEnum)
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                        ) {
+                            Box(modifier = Modifier.padding(16.dp)) {
+                                StepperEstado(
+                                    estadoActual = estadoEnum,
+                                    fechasEtapas = fechasMap
+                                )
+                            }
+                        }
                     }
 
                     item {
                         Text(
                             text = "Detalle",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC))
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 item.detalles.forEach { d ->
+                                    val cantFormatted = if (d.servicio.unidad.equals("KG", ignoreCase = true)) {
+                                        if (d.detalle.cantidad % 1.0 == 0.0) {
+                                            "${d.detalle.cantidad.toInt()} kg"
+                                        } else {
+                                            String.format(Locale.US, "%.1f kg", d.detalle.cantidad)
+                                        }
+                                    } else {
+                                        val cInt = d.detalle.cantidad.toInt()
+                                        val uNorm = d.servicio.unidad.lowercase(Locale.getDefault())
+                                        val unStr = if (uNorm.contains("und") || uNorm.contains("unidad")) {
+                                            "und"
+                                        } else if (cInt == 1) {
+                                            uNorm
+                                        } else {
+                                            "${uNorm}s"
+                                        }
+                                        "$cInt $unStr"
+                                    }
+
+                                    val precioUnitarioStr = String.format(Locale.US, "S/ %.2f", d.servicio.precio)
+                                    val textoIzquierda = "${d.servicio.nombre} · $cantFormatted × $precioUnitarioStr"
+
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        val unidadStr = if (d.servicio.unidad.equals("KG", ignoreCase = true)) "kg" else "prendas"
                                         Text(
-                                            text = "${d.servicio.nombre} · ${d.detalle.cantidad} $unidadStr",
+                                            text = textoIzquierda,
                                             fontSize = 13.sp,
-                                            color = Color.DarkGray
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.weight(1f, fill = false)
                                         )
+                                        Spacer(modifier = Modifier.width(8.dp))
                                         Text(
                                             text = String.format(Locale.US, "S/ %.2f", d.detalle.subtotal),
                                             fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                 }
 
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                                )
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Text("Total", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                    Text(
+                                        "Total",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
                                     Text(
                                         text = String.format(Locale.US, "S/ %.2f", item.pedido.total),
                                         fontWeight = FontWeight.Bold,
@@ -183,25 +285,41 @@ fun DetallePedidoScreen(
                             "Casillero: se asignará al estar listo"
                         }
 
+                        val esOscuro = isSystemInDarkTheme()
+                        val fondoPago = if (estaPagado) {
+                            if (esOscuro) Color(0xFF064E3B) else Color(0xFFE8F5E9)
+                        } else {
+                            if (esOscuro) Color(0xFF78350F) else Color(0xFFFFF8E1)
+                        }
+                        val textoPago = if (estaPagado) {
+                            if (esOscuro) Color(0xFFA7F3D0) else Color(0xFF2E7D32)
+                        } else {
+                            if (esOscuro) Color(0xFFFDE68A) else Color(0xFFE65100)
+                        }
+                        val textoSubCasillero = if (estaPagado) {
+                            if (esOscuro) Color(0xFFA7F3D0) else Color(0xFF166534)
+                        } else {
+                            if (esOscuro) Color(0xFFFDE68A) else Color(0xFF78350F)
+                        }
+
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (estaPagado) Color(0xFFE8F5E9) else Color(0xFFFFF8E1)
-                            )
+                            colors = CardDefaults.cardColors(containerColor = fondoPago)
                         ) {
                             Column(modifier = Modifier.padding(14.dp)) {
                                 Text(
                                     text = if (estaPagado) "Pago realizado" else "Pago pendiente - se paga al recoger",
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.sp,
-                                    color = if (estaPagado) Color(0xFF2E7D32) else Color(0xFFE65100)
+                                    color = textoPago
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = textoCasillero,
                                     fontSize = 12.sp,
-                                    color = Color.DarkGray
+                                    fontWeight = FontWeight.Medium,
+                                    color = textoSubCasillero
                                 )
                             }
                         }
@@ -219,21 +337,25 @@ fun DetallePedidoScreen(
                         enabled = puedeCancelar,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(25.dp),
+                            .height(48.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = if (puedeCancelar) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                        ),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error,
-                            disabledContentColor = Color.Gray
+                            contentColor = Color(0xFFEF4444),
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
                     ) {
-                        Text("Cancelar pedido", fontWeight = FontWeight.Bold)
+                        Text("Cancelar pedido", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
 
                     if (!puedeCancelar && estadoEnum != EstadoPedido.CANCELADO) {
                         Text(
                             text = "Solo se cancela antes de empezar el lavado",
                             fontSize = 12.sp,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 6.dp)
                         )
                     }

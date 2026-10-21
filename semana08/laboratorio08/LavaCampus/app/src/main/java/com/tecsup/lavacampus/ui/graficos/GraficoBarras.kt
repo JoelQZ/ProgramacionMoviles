@@ -3,12 +3,13 @@ package com.tecsup.lavacampus.ui.graficos
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tecsup.lavacampus.ui.theme.ColorAdministrador
@@ -19,6 +20,22 @@ fun GraficoBarras(
     datos: List<DatoGrafico>,
     modifier: Modifier = Modifier
 ) {
+    if (datos.isEmpty()) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(140.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Sin datos de ingresos",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        return
+    }
+
     val maxValor = (datos.maxOfOrNull { it.valor } ?: 1f).coerceAtLeast(1f)
 
     Row(
@@ -30,35 +47,49 @@ fun GraficoBarras(
         verticalAlignment = Alignment.Bottom
     ) {
         datos.forEach { dato ->
-            val porcentaje = (dato.valor / maxValor).coerceIn(0.12f, 1f)
+            val fraccion = (dato.valor / maxValor).coerceIn(0.08f, 1f)
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.fillMaxHeight()
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
             ) {
                 Text(
                     text = String.format(Locale.US, "%.0f", dato.valor),
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Box(
                     modifier = Modifier
-                        .width(38.dp)
-                        .fillMaxHeight(porcentaje * 0.7f)
-                        .background(ColorAdministrador, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                )
+                        .fillMaxWidth(0.55f)
+                        .height(90.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(fraccion)
+                            .background(
+                                color = ColorAdministrador,
+                                shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+                            )
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
                     text = dato.etiqueta,
                     fontSize = 11.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1
                 )
             }
         }

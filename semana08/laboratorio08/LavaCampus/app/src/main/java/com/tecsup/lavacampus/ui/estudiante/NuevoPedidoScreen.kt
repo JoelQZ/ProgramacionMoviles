@@ -55,19 +55,24 @@ fun NuevoPedidoScreen(
                             text = "Nuevo pedido",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(end = 48.dp)
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -84,7 +89,8 @@ fun NuevoPedidoScreen(
                         text = "¿Qué necesitas?",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                     )
                 }
 
@@ -105,17 +111,25 @@ fun NuevoPedidoScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                     OutlinedTextField(
                         value = nota,
                         onValueChange = { viewModel.onNotaChanged(it) },
-                        label = { Text("Nota (opcional)", fontSize = 13.sp) },
-                        placeholder = { Text("Ropa de color separada", fontSize = 13.sp, color = Color.Gray) },
+                        label = { Text("Nota (opcional)", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                        placeholder = { Text("Ropa de color separada", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color(0xFFE5E7EB),
-                            focusedBorderColor = ColorEstudiante
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                            focusedBorderColor = ColorEstudiante,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            focusedLabelColor = ColorEstudiante,
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     )
                 }
@@ -125,12 +139,12 @@ fun NuevoPedidoScreen(
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 6.dp),
+                                .padding(vertical = 4.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFFE0F7FA)
+                                containerColor = MaterialTheme.colorScheme.surface
                             ),
                             shape = RoundedCornerShape(16.dp),
-                            border = BorderStroke(1.dp, Color(0xFFB2EBF2))
+                            border = BorderStroke(1.dp, ColorEstudiante.copy(alpha = 0.3f))
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
@@ -145,18 +159,38 @@ fun NuevoPedidoScreen(
                                     val cant = cantidades[s.id] ?: 0.0
                                     if (cant > 0.0) {
                                         val subtotal = cant * s.precio
+                                        val esKg = s.unidad.equals("KG", ignoreCase = true)
+
+                                        val textoCant = if (esKg) {
+                                            String.format(Locale.US, "%.1f kg", cant)
+                                        } else {
+                                            val cInt = cant.toInt()
+                                            val uNorm = s.unidad.lowercase()
+                                            if (uNorm.contains("und") || uNorm.contains("unidad")) {
+                                                "$cInt und"
+                                            } else if (cInt == 1) {
+                                                "1 $uNorm"
+                                            } else {
+                                                "$cInt ${uNorm}s"
+                                            }
+                                        }
+
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(vertical = 3.dp),
                                             horizontalArrangement = Arrangement.SpaceBetween
                                         ) {
-                                            val textoCant = if (s.unidad.equals("KG", ignoreCase = true)) "$cant kg" else "${cant.toInt()} prendas"
-                                            Text("${s.nombre} $textoCant", fontSize = 13.sp, color = Color.DarkGray)
+                                            Text(
+                                                "${s.nombre} $textoCant",
+                                                fontSize = 13.sp,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
                                             Text(
                                                 String.format(Locale.US, "S/ %.2f", subtotal),
                                                 fontSize = 13.sp,
-                                                fontWeight = FontWeight.Bold
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
                                             )
                                         }
                                     }
@@ -164,7 +198,7 @@ fun NuevoPedidoScreen(
 
                                 HorizontalDivider(
                                     modifier = Modifier.padding(vertical = 10.dp),
-                                    color = Color(0xFFE2E8F0)
+                                    color = MaterialTheme.colorScheme.outlineVariant
                                 )
 
                                 Row(
@@ -172,7 +206,12 @@ fun NuevoPedidoScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Total", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                                    Text(
+                                        "Total",
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
                                     Text(
                                         String.format(Locale.US, "S/ %.2f", total),
                                         fontWeight = FontWeight.Bold,
@@ -204,7 +243,7 @@ fun NuevoPedidoScreen(
                 Text(
                     text = fechaEstimada,
                     fontSize = 12.sp,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 10.dp)
                 )
 
@@ -213,12 +252,12 @@ fun NuevoPedidoScreen(
                     enabled = hayServiciosSeleccionados,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = ColorEstudiante,
-                        disabledContainerColor = Color(0xFF94A3B8)
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(26.dp)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(25.dp)
                 ) {
                     Text("Confirmar pedido", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
@@ -234,7 +273,7 @@ private fun ItemServicioPedido(
     onIncrementar: () -> Unit,
     onDecrementar: () -> Unit
 ) {
-    val estaActivo = cantidad > 0
+    val estaActivo = cantidad > 0.0
 
     val iconoServicio: ImageVector = when {
         servicio.nombre.contains("Planchado", ignoreCase = true) -> Icons.Default.Checkroom
@@ -248,76 +287,89 @@ private fun ItemServicioPedido(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         border = BorderStroke(
             width = if (estaActivo) 2.dp else 1.dp,
-            color = if (estaActivo) ColorEstudiante else Color(0xFFF1F5F9)
+            color = if (estaActivo) ColorEstudiante else MaterialTheme.colorScheme.outlineVariant
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (estaActivo) 1.dp else 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(14.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (estaActivo) Color(0xFFE0F2FE) else Color(0xFFF3F4F6)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = iconoServicio,
-                    contentDescription = null,
-                    tint = ColorEstudiante,
-                    modifier = Modifier.size(24.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(if (estaActivo) ColorEstudiante.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = iconoServicio,
+                        contentDescription = null,
+                        tint = ColorEstudiante,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = servicio.nombre,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = String.format(Locale.US, "S/ %.2f por %s · %s", servicio.precio, servicio.unidad.lowercase(), horasTexto),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = servicio.nombre,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp
-                )
-                Text(
-                    text = String.format(Locale.US, "S/ %.2f por %s · %s", servicio.precio, servicio.unidad.lowercase(), horasTexto),
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(if (estaActivo) ColorEstudiante else Color(0xFFE2E8F0))
+                        .background(if (estaActivo) ColorEstudiante else MaterialTheme.colorScheme.surfaceVariant)
                         .clickable(enabled = estaActivo) { onDecrementar() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Remove,
                         contentDescription = "Restar",
-                        tint = Color.White,
+                        tint = if (estaActivo) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                 }
 
                 Text(
                     text = if (servicio.unidad.equals("KG", ignoreCase = true)) {
-                        if (cantidad == 0.0) "0" else "$cantidad kg"
+                        if (cantidad == 0.0) "0" else String.format(Locale.US, "%.1f kg", cantidad)
                     } else {
                         "${cantidad.toInt()}"
                     },
                     modifier = Modifier.padding(horizontal = 10.dp),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Box(

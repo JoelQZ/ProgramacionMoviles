@@ -23,26 +23,29 @@ import com.tecsup.lavacampus.ui.theme.ColorEstudiante
 fun IconoServicio(
     nombreServicio: String,
     modifier: Modifier = Modifier,
-    size: Dp = 24.dp
+    size: Dp = 22.dp,
+    backgroundColor: Color? = null,
+    tintColor: Color? = null
 ) {
     val icono: ImageVector = when {
         nombreServicio.contains("Planchado", ignoreCase = true) -> Icons.Default.Checkroom
-        nombreServicio.contains("Edredón", ignoreCase = true) ||
-                nombreServicio.contains("Camisa", ignoreCase = true) ||
-                nombreServicio.contains("Seco", ignoreCase = true) -> Icons.Default.DryCleaning
+        nombreServicio.contains("Seco", ignoreCase = true) || nombreServicio.contains("Edredón", ignoreCase = true) -> Icons.Default.DryCleaning
         else -> Icons.Default.LocalLaundryService
     }
+
+    val fondoFinal = backgroundColor ?: Color(0xFFE0F2FE)
+    val tintFinal = tintColor ?: ColorEstudiante
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFE0F2FE), RoundedCornerShape(12.dp)),
+            .background(fondoFinal, RoundedCornerShape(12.dp)),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icono,
             contentDescription = nombreServicio,
-            tint = ColorEstudiante,
+            tint = tintFinal,
             modifier = Modifier.size(size)
         )
     }

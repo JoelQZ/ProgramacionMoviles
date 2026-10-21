@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.LocalOffer
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -28,9 +27,13 @@ import androidx.compose.ui.unit.sp
 import com.tecsup.lavacampus.data.local.entity.Usuario
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.model.EstadoPedido
+import com.tecsup.lavacampus.ui.components.IconoCampanaNotificaciones
+import com.tecsup.lavacampus.ui.components.ItemNotificacion
 import com.tecsup.lavacampus.ui.navigation.Rutas
 import com.tecsup.lavacampus.ui.theme.ColorEstudiante
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,6 +50,35 @@ fun InicioScreen(
     val pedidoActivo by viewModel.pedidoActivo.collectAsState()
     val recientes by viewModel.recientes.collectAsState()
 
+    val pedidosListos = remember(pedidoActivo, recientes) {
+        val lista = mutableListOf<PedidoConDetalle>()
+        if (pedidoActivo?.pedido?.estado?.uppercase() == "LISTO") {
+            lista.add(pedidoActivo!!)
+        }
+        recientes.forEach { p ->
+            if (p.pedido.estado.uppercase() == "LISTO" && lista.none { it.pedido.id == p.pedido.id }) {
+                lista.add(p)
+            }
+        }
+        lista
+    }
+
+    val notificacionesListos = remember(pedidosListos) {
+        pedidosListos.map { item ->
+            ItemNotificacion(
+                id = item.pedido.id.toLong(),
+                titulo = "Pedido #${String.format(Locale.US, "%03d", item.pedido.id)} ¡Listo para recoger!",
+                detalle = if (!item.pedido.casillero.isNullOrBlank()) {
+                    "Recógelo en el casillero ${item.pedido.casillero}"
+                } else {
+                    "Casillero pendiente de asignación"
+                },
+                subtexto = String.format(Locale.US, "Total: S/ %.2f", item.pedido.total),
+                onClickItem = { onVerDetallePedido(item.pedido.id.toLong()) }
+            )
+        }
+    }
+
     Scaffold(
         bottomBar = {
             BarraInferiorEstudiante(
@@ -60,7 +92,7 @@ fun InicioScreen(
                 }
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -79,17 +111,22 @@ fun InicioScreen(
                         Text(
                             text = "Hola, ${usuario.nombre.split(" ").firstOrNull() ?: usuario.nombre}",
                             fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
                             text = "${usuario.codigo} - Tecsup",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Notificaciones")
-                    }
+                    IconoCampanaNotificaciones(
+                        tieneNotificaciones = notificacionesListos.isNotEmpty(),
+                        listaNotificaciones = notificacionesListos,
+                        tituloDialogo = "Pedidos listos para recojo",
+                        tintIcono = MaterialTheme.colorScheme.onBackground,
+                        colorBrand = ColorEstudiante
+                    )
                 }
             }
 
@@ -173,7 +210,7 @@ fun InicioScreen(
                         .height(50.dp),
                     shape = RoundedCornerShape(25.dp)
                 ) {
-                    Text(text = "Nuevo pedido", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("Nuevo pedido", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -187,7 +224,7 @@ fun InicioScreen(
                             .weight(1f)
                             .clickable { onVerMisPedidos() },
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F8FA))
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
@@ -196,8 +233,8 @@ fun InicioScreen(
                             Icon(Icons.Default.ListAlt, contentDescription = null, tint = ColorEstudiante)
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
-                                Text("Mis pedidos", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("Ver estado", color = Color.Gray, fontSize = 11.sp)
+                                Text("Mis pedidos", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Ver estado", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                             }
                         }
                     }
@@ -207,7 +244,7 @@ fun InicioScreen(
                             .weight(1f)
                             .clickable { onVerTarifas() },
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F8FA))
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp),
@@ -216,8 +253,8 @@ fun InicioScreen(
                             Icon(Icons.Default.LocalOffer, contentDescription = null, tint = ColorEstudiante)
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
-                                Text("Tarifas", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text("Precios por kg", color = Color.Gray, fontSize = 11.sp)
+                                Text("Tarifas", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                                Text("Precios por kg", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                             }
                         }
                     }
@@ -230,7 +267,12 @@ fun InicioScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Últimos pedidos", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(
+                        "Últimos pedidos",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                     TextButton(onClick = onVerMisPedidos) {
                         Text("Ver todos", color = ColorEstudiante)
                     }
@@ -261,7 +303,7 @@ private fun StepperEstadoLocal(estadoActual: EstadoPedido) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(30.dp))
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(30.dp))
             .padding(vertical = 8.dp, horizontal = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -273,7 +315,7 @@ private fun StepperEstadoLocal(estadoActual: EstadoPedido) {
                     modifier = Modifier
                         .size(20.dp)
                         .clip(CircleShape)
-                        .background(if (completado) ColorEstudiante else Color.LightGray),
+                        .background(if (completado) ColorEstudiante else MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     if (completado) {
@@ -283,7 +325,7 @@ private fun StepperEstadoLocal(estadoActual: EstadoPedido) {
                 Text(
                     text = label,
                     fontSize = 9.sp,
-                    color = if (completado) ColorEstudiante else Color.Gray,
+                    color = if (completado) ColorEstudiante else MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = if (completado) FontWeight.Bold else FontWeight.Normal
                 )
             }
@@ -302,7 +344,7 @@ private fun PedidoCardLocal(
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -310,17 +352,26 @@ private fun PedidoCardLocal(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text("Pedido #${p.id.toString().padStart(3, '0')}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(
+                    "Pedido #${p.id.toString().padStart(3, '0')}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 val fechaTexto = remember(p.fechaCreacion) {
                     try {
-                        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-                        sdf.format(java.util.Date(p.fechaCreacion))
+                        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        sdf.format(Date(p.fechaCreacion))
                     } catch (e: Exception) {
                         p.fechaCreacion.toString()
                     }
                 }
 
-                Text(text = fechaTexto, color = Color.Gray, fontSize = 12.sp)
+                Text(
+                    text = fechaTexto,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Surface(
                     shape = RoundedCornerShape(12.dp),
@@ -354,34 +405,58 @@ private fun BarraInferiorEstudiante(
     rutaSeleccionada: String,
     onNavegar: (String) -> Unit
 ) {
-    NavigationBar(containerColor = Color.White) {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
         NavigationBarItem(
             selected = rutaSeleccionada == Rutas.INICIO_ESTUDIANTE,
             onClick = { onNavegar(Rutas.INICIO_ESTUDIANTE) },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
             label = { Text("Inicio", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(selectedIconColor = ColorEstudiante, indicatorColor = Color(0xFFE0F2FE))
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
         NavigationBarItem(
             selected = rutaSeleccionada == Rutas.MIS_PEDIDOS,
             onClick = { onNavegar(Rutas.MIS_PEDIDOS) },
             icon = { Icon(Icons.Default.ListAlt, contentDescription = "Pedidos") },
             label = { Text("Pedidos", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(selectedIconColor = ColorEstudiante, indicatorColor = Color(0xFFE0F2FE))
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
         NavigationBarItem(
             selected = rutaSeleccionada == Rutas.TARIFAS,
             onClick = { onNavegar(Rutas.TARIFAS) },
             icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Tarifas") },
             label = { Text("Tarifas", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(selectedIconColor = ColorEstudiante, indicatorColor = Color(0xFFE0F2FE))
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
         NavigationBarItem(
-            selected = false,
-            onClick = { },
+            selected = rutaSeleccionada == Rutas.PERFIL_ESTUDIANTE,
+            onClick = { onNavegar(Rutas.PERFIL_ESTUDIANTE) },
             icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
-            label = { Text("Perfil", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(unselectedIconColor = Color.Gray)
+            label = { Text("Perfil", fontSize = 10.sp) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
     }
 }

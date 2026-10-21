@@ -1,5 +1,6 @@
 package com.tecsup.lavacampus.ui.estudiante
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -47,6 +48,15 @@ fun TarifasScreen(
 ) {
     val servicios by viewModel.serviciosActivos.collectAsState()
 
+    val serviciosOrdenados = servicios.sortedBy { servicio ->
+        when {
+            servicio.nombre.contains("Lavado y secado", ignoreCase = true) -> 1
+            servicio.nombre.contains("Planchado", ignoreCase = true) -> 2
+            servicio.nombre.contains("Seco", ignoreCase = true) -> 3
+            else -> 4
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -56,16 +66,21 @@ fun TarifasScreen(
                             "Tarifas y servicios",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(end = 48.dp)
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
         bottomBar = {
@@ -74,7 +89,7 @@ fun TarifasScreen(
                 onNavegar = onNavegarTab
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -83,12 +98,12 @@ fun TarifasScreen(
                 .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            items(servicios) { servicio ->
+            items(serviciosOrdenados) { servicio ->
                 ItemTarifaTarjeta(servicio = servicio)
             }
 
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.Top) {
                     Icon(
                         Icons.Default.AccessTime,
@@ -98,23 +113,51 @@ fun TarifasScreen(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
-                        Text("Horario de atención", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                        Text("Lunes a sábado : 8:00 a 18:00", fontSize = 12.sp, color = Color.Gray)
-                        Text("Recojo en casilleros del pabellón A", fontSize = 12.sp, color = Color.Gray)
+                        Text(
+                            "Horario de atención",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = ColorEstudiante
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            "Lunes a sábado · 8:00 a 18:00",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "Recojo en casilleros del pabellón A",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
 
             item {
+                val esOscuro = isSystemInDarkTheme()
+                val fondoAviso = if (esOscuro) Color(0xFF451A03) else Color(0xFFFEF3C7)
+                val textoAviso = if (esOscuro) Color(0xFFFDE68A) else Color(0xFFB45309)
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF3C7))
+                    colors = CardDefaults.cardColors(containerColor = fondoAviso)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        Text("Mínimo 1 kg por servicio de lavado.", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFFB45309))
+                        Text(
+                            "Mínimo 1 kg por servicio de lavado.",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp,
+                            color = textoAviso
+                        )
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text("Máximo 3 pedidos activos por estudiante.", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color(0xFFB45309))
+                        Text(
+                            "Máximo 3 pedidos activos por estudiante.",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp,
+                            color = textoAviso
+                        )
                     }
                 }
             }
@@ -129,8 +172,8 @@ private fun ItemTarifaTarjeta(servicio: Servicio) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -142,16 +185,34 @@ private fun ItemTarifaTarjeta(servicio: Servicio) {
                 modifier = Modifier.size(48.dp),
                 contentAlignment = Alignment.Center
             ) {
-                IconoServicio(nombreServicio = servicio.nombre)
+                IconoServicio(
+                    nombreServicio = servicio.nombre,
+                    backgroundColor = ColorEstudiante.copy(alpha = 0.15f),
+                    tintColor = ColorEstudiante
+                )
             }
 
             Spacer(modifier = Modifier.width(14.dp))
 
             Column {
-                Text(servicio.nombre, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                Text(
+                    servicio.nombre,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 Spacer(modifier = Modifier.height(2.dp))
-                Text(servicio.textoPrecio(), fontWeight = FontWeight.Bold, color = ColorEstudiante, fontSize = 13.sp)
-                Text("Entrega en $tiempoEntrega", fontSize = 11.sp, color = Color.Gray)
+                Text(
+                    servicio.textoPrecio(),
+                    fontWeight = FontWeight.Bold,
+                    color = ColorEstudiante,
+                    fontSize = 13.sp
+                )
+                Text(
+                    "Entrega en $tiempoEntrega",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -162,34 +223,58 @@ private fun BarraInferiorEstudiante(
     rutaSeleccionada: String,
     onNavegar: (String) -> Unit
 ) {
-    NavigationBar(containerColor = Color.White) {
+    NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
         NavigationBarItem(
             selected = rutaSeleccionada == Rutas.INICIO_ESTUDIANTE,
             onClick = { onNavegar(Rutas.INICIO_ESTUDIANTE) },
             icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
             label = { Text("Inicio", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(selectedIconColor = ColorEstudiante, indicatorColor = Color(0xFFE0F2FE))
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
         NavigationBarItem(
             selected = rutaSeleccionada == Rutas.MIS_PEDIDOS,
             onClick = { onNavegar(Rutas.MIS_PEDIDOS) },
             icon = { Icon(Icons.Default.ListAlt, contentDescription = "Pedidos") },
             label = { Text("Pedidos", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(selectedIconColor = ColorEstudiante, indicatorColor = Color(0xFFE0F2FE))
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
         NavigationBarItem(
             selected = rutaSeleccionada == Rutas.TARIFAS,
             onClick = { onNavegar(Rutas.TARIFAS) },
             icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Tarifas") },
             label = { Text("Tarifas", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(selectedIconColor = ColorEstudiante, indicatorColor = Color(0xFFE0F2FE))
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
         NavigationBarItem(
-            selected = false,
-            onClick = { },
+            selected = rutaSeleccionada == Rutas.PERFIL_ESTUDIANTE,
+            onClick = { onNavegar(Rutas.PERFIL_ESTUDIANTE) },
             icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
-            label = { Text("Perfil", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(unselectedIconColor = Color.Gray)
+            label = { Text("Perfil", fontSize = 10.sp) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = ColorEstudiante,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedTextColor = ColorEstudiante,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = ColorEstudiante.copy(alpha = 0.15f)
+            )
         )
     }
 }
