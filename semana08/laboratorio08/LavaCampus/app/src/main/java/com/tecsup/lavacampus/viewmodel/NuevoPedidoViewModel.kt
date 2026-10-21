@@ -1,9 +1,11 @@
 package com.tecsup.lavacampus.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.lavacampus.data.local.entity.Servicio
 import com.tecsup.lavacampus.data.local.entity.Usuario
+import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.LineaPedido
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,6 +95,35 @@ class NuevoPedidoViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = ""
     )
+
+    fun precargarDesdePedido(pedidoConDetalle: PedidoConDetalle) {
+        val mapaPreCargado = mutableMapOf<Int, Double>()
+        pedidoConDetalle.detalles.forEach { d ->
+            val idServicio = if (d.servicio.id > 0) d.servicio.id else d.detalle.servicioId
+            if (d.detalle.cantidad > 0.0) {
+                mapaPreCargado[idServicio] = d.detalle.cantidad
+            }
+        }
+        _cantidades.value = mapaPreCargado
+        if (pedidoConDetalle.pedido.nota.isNotBlank()) {
+            _nota.value = pedidoConDetalle.pedido.nota
+        }
+        Log.d("REPETIR", "Precargadas cantidades: $mapaPreCargado")
+    }
+
+    fun cargarYPrecargarPedido(pedidoId: Int) {
+        Log.d("REPETIR", "Cargando pedidoId: $pedidoId")
+        viewModelScope.launch {
+            repository.observarPedido(pedidoId).collect { pedidoConDetalle ->
+                if (pedidoConDetalle != null) {
+                    Log.d("REPETIR", "Pedido encontrado con id: ${pedidoConDetalle.pedido.id}, detalles: ${pedidoConDetalle.detalles.size}")
+                    precargarDesdePedido(pedidoConDetalle)
+                } else {
+                    Log.d("REPETIR", "Pedido es NULL para id: $pedidoId")
+                }
+            }
+        }
+    }
 
     fun cambiarCantidad(servicio: Servicio, delta: Double) {
         val actual = _cantidades.value[servicio.id] ?: 0.0

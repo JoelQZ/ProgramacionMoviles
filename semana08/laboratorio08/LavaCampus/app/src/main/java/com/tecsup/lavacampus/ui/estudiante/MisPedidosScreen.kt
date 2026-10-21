@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +39,7 @@ fun MisPedidosScreen(
     viewModel: MisPedidosViewModel,
     onNuevoPedido: () -> Unit,
     onVerDetallePedido: (Long) -> Unit,
+    onRepetirPedido: (Int) -> Unit = {},
     onVolver: () -> Unit = {},
     onNavegarTab: (String) -> Unit = {}
 ) {
@@ -169,7 +171,8 @@ fun MisPedidosScreen(
                         ItemPedidoTarjeta(
                             item = item,
                             onClick = { onVerDetallePedido(item.pedido.id.toLong()) },
-                            onCancelar = { pedidoACancelar = item }
+                            onCancelar = { pedidoACancelar = item },
+                            onRepetir = { onRepetirPedido(item.pedido.id) }
                         )
                     }
 
@@ -227,7 +230,8 @@ fun MisPedidosScreen(
 private fun ItemPedidoTarjeta(
     item: PedidoConDetalle,
     onClick: () -> Unit,
-    onCancelar: () -> Unit
+    onCancelar: () -> Unit,
+    onRepetir: (() -> Unit)? = null
 ) {
     val p = item.pedido
     val estStr = p.estado.uppercase()
@@ -326,44 +330,52 @@ private fun ItemPedidoTarjeta(
             ) {
                 EstadoPedidoChip(estado = estadoEnum)
 
-                if (esListo && !p.casillero.isNullOrBlank()) {
-                    Button(
-                        onClick = onClick,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A34A)),
-                        shape = RoundedCornerShape(20.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Text("Casillero ${p.casillero}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (esListo && !p.casillero.isNullOrBlank()) {
+                        Button(
+                            onClick = onClick,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A34A)),
+                            shape = RoundedCornerShape(20.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Text("Casillero ${p.casillero}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    } else if (esRecibido) {
+                        Text(
+                            "Cancelar",
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            modifier = Modifier.clickable { onCancelar() }
+                        )
                     }
-                } else if (esRecibido) {
-                    Text(
-                        "Cancelar",
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        modifier = Modifier.clickable { onCancelar() }
-                    )
-                } else {
-                    Text(
-                        "Entrega ${formatearFechaEntregaPrototipo(p.fechaEntrega)}",
-                        fontSize = 11.sp,
-                        color = ColorEstudiante,
-                        fontWeight = FontWeight.Medium
-                    )
+
+                    if (onRepetir != null) {
+                        OutlinedButton(
+                            onClick = onRepetir,
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, ColorEstudiante),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorEstudiante),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = ColorEstudiante
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Repetir", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
             }
         }
-    }
-}
-
-private fun formatearFechaEntregaPrototipo(fechaRaw: String): String {
-    return try {
-        val parsed = LocalDate.parse(fechaRaw)
-        val formatter = DateTimeFormatter.ofPattern("EEE d", Locale("es", "ES"))
-        parsed.format(formatter)
-    } catch (e: Exception) {
-        fechaRaw
     }
 }
 

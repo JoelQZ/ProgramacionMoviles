@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -87,9 +90,9 @@ fun NavLava(
             val usuario = usuarioActual
             if (usuario != null) {
                 val inicioViewModel: InicioViewModel = viewModel(
-                    factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                    factory = object : ViewModelProvider.Factory {
                         @Suppress("UNCHECKED_CAST")
-                        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
                             return InicioViewModel(repository, usuario) as T
                         }
                     }
@@ -98,7 +101,7 @@ fun NavLava(
                 InicioScreen(
                     usuario = usuario,
                     viewModel = inicioViewModel,
-                    onNuevoPedido = { navController.navigate(Rutas.NUEVO_PEDIDO) },
+                    onNuevoPedido = { navController.navigate("nuevo_pedido/-1") },
                     onVerMisPedidos = { navController.navigate(Rutas.MIS_PEDIDOS) },
                     onVerTarifas = { navController.navigate(Rutas.TARIFAS) },
                     onVerDetallePedido = { pedidoId ->
@@ -122,9 +125,9 @@ fun NavLava(
 
         composable(Rutas.PANEL_ADMIN) {
             val panelViewModel: PanelViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return PanelViewModel(repository) as T
                     }
                 }
@@ -158,9 +161,9 @@ fun NavLava(
             val usuarioId = backStackEntry.arguments?.getInt("usuarioId") ?: -1
 
             val bandejaViewModel: BandejaViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return BandejaViewModel(repository, usuarioId) as T
                     }
                 }
@@ -190,9 +193,9 @@ fun NavLava(
             val pedidoId = backStackEntry.arguments?.getInt("pedidoId") ?: return@composable
 
             val gestionViewModel: GestionPedidoViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return GestionPedidoViewModel(repository, pedidoId) as T
                     }
                 }
@@ -206,9 +209,9 @@ fun NavLava(
 
         composable(Rutas.SERVICIOS_ADMIN) {
             val serviciosViewModel: ServiciosViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return ServiciosViewModel(repository) as T
                     }
                 }
@@ -245,9 +248,9 @@ fun NavLava(
             val servicioId = backStackEntry.arguments?.getInt("servicioId") ?: -1
 
             val serviciosViewModel: ServiciosViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return ServiciosViewModel(repository) as T
                     }
                 }
@@ -276,9 +279,9 @@ fun NavLava(
 
         composable(Rutas.CLIENTES_ADMIN) {
             val clientesViewModel: ClientesViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return ClientesViewModel(repository) as T
                     }
                 }
@@ -355,17 +358,33 @@ fun NavLava(
             }
         }
 
-        composable(Rutas.NUEVO_PEDIDO) {
+        composable(
+            route = Rutas.NUEVO_PEDIDO,
+            arguments = listOf(
+                navArgument("repetirPedidoId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val repetirPedidoId = backStackEntry.arguments?.getInt("repetirPedidoId") ?: -1
             val usuario = usuarioActual
             if (usuario != null) {
                 val nuevoPedidoViewModel: NuevoPedidoViewModel = viewModel(
-                    factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                    key = "nuevo_pedido_$repetirPedidoId",
+                    factory = object : ViewModelProvider.Factory {
                         @Suppress("UNCHECKED_CAST")
-                        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
                             return NuevoPedidoViewModel(repository, usuario) as T
                         }
                     }
                 )
+
+                LaunchedEffect(repetirPedidoId) {
+                    if (repetirPedidoId > 0) {
+                        nuevoPedidoViewModel.cargarYPrecargarPedido(repetirPedidoId)
+                    }
+                }
 
                 NuevoPedidoScreen(
                     viewModel = nuevoPedidoViewModel,
@@ -386,9 +405,9 @@ fun NavLava(
             val pedidoId = backStackEntry.arguments?.getInt("pedidoId") ?: return@composable
 
             val detalleViewModel: DetallePedidoViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return DetallePedidoViewModel(repository, pedidoId) as T
                     }
                 }
@@ -396,7 +415,10 @@ fun NavLava(
 
             DetallePedidoScreen(
                 viewModel = detalleViewModel,
-                onVolver = { navController.popBackStack() }
+                onVolver = { navController.popBackStack() },
+                onRepetirPedido = { id ->
+                    navController.navigate("nuevo_pedido/$id")
+                }
             )
         }
 
@@ -404,9 +426,9 @@ fun NavLava(
             val usuario = usuarioActual
             if (usuario != null) {
                 val misPedidosViewModel: MisPedidosViewModel = viewModel(
-                    factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                    factory = object : ViewModelProvider.Factory {
                         @Suppress("UNCHECKED_CAST")
-                        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
                             return MisPedidosViewModel(repository, usuario) as T
                         }
                     }
@@ -414,9 +436,12 @@ fun NavLava(
 
                 MisPedidosScreen(
                     viewModel = misPedidosViewModel,
-                    onNuevoPedido = { navController.navigate(Rutas.NUEVO_PEDIDO) },
+                    onNuevoPedido = { navController.navigate("nuevo_pedido/-1") },
                     onVerDetallePedido = { pedidoId ->
                         navController.navigate("detalle_pedido/$pedidoId")
+                    },
+                    onRepetirPedido = { id ->
+                        navController.navigate("nuevo_pedido/$id")
                     },
                     onVolver = { navController.popBackStack() },
                     onNavegarTab = { ruta ->
@@ -433,9 +458,9 @@ fun NavLava(
 
         composable(Rutas.TARIFAS) {
             val serviciosViewModel: ServiciosViewModel = viewModel(
-                factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+                factory = object : ViewModelProvider.Factory {
                     @Suppress("UNCHECKED_CAST")
-                    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return ServiciosViewModel(repository) as T
                     }
                 }

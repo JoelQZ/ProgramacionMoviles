@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocalLaundryService
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,7 +48,8 @@ private fun formatearHoraPaso(milisegundos: Long): String {
 @Composable
 fun DetallePedidoScreen(
     viewModel: DetallePedidoViewModel,
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onRepetirPedido: (Int) -> Unit = {}
 ) {
     val pedidoConDetalle by viewModel.pedido.collectAsState()
     val puedeCancelar by viewModel.puedeCancelar.collectAsState()
@@ -381,6 +383,26 @@ fun DetallePedidoScreen(
                         .padding(vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Button(
+                        onClick = { onRepetirPedido(item.pedido.id) },
+                        colors = ButtonDefaults.buttonColors(containerColor = ColorEstudiante),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Pedir de nuevo", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     OutlinedButton(
                         onClick = { mostrarDialogoCancelar = true },
                         enabled = puedeCancelar,

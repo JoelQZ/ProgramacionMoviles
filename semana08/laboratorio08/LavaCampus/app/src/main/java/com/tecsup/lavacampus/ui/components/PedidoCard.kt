@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -24,7 +26,8 @@ import java.util.Locale
 fun PedidoCard(
     pedidoConDetalle: PedidoConDetalle,
     onClick: () -> Unit,
-    onCancelar: (() -> Unit)? = null
+    onCancelar: (() -> Unit)? = null,
+    onRepetir: (() -> Unit)? = null
 ) {
     val p = pedidoConDetalle.pedido
     val detalles = pedidoConDetalle.detalles
@@ -147,31 +150,49 @@ fun PedidoCard(
                     }
                 }
 
-                if (esListo && !p.casillero.isNullOrBlank()) {
-                    Button(
-                        onClick = onClick,
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A34A)),
-                        shape = RoundedCornerShape(20.dp),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Text("Casillero ${p.casillero}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (esListo && !p.casillero.isNullOrBlank()) {
+                        Button(
+                            onClick = onClick,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF16A34A)),
+                            shape = RoundedCornerShape(20.dp),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Text("Casillero ${p.casillero}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    } else if (esRecibido && onCancelar != null) {
+                        Text(
+                            "Cancelar",
+                            color = Color(0xFFEF4444),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp,
+                            modifier = Modifier.clickable { onCancelar() }
+                        )
                     }
-                } else if (esRecibido && onCancelar != null) {
-                    Text(
-                        "Cancelar",
-                        color = Color(0xFFEF4444),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp,
-                        modifier = Modifier.clickable { onCancelar() }
-                    )
-                } else {
-                    Text(
-                        "Entrega ${p.fechaEntrega}",
-                        fontSize = 11.sp,
-                        color = if (esAtrasado) Color(0xFFEF4444) else ColorEstudiante,
-                        fontWeight = FontWeight.Medium
-                    )
+
+                    if (onRepetir != null) {
+                        OutlinedButton(
+                            onClick = onRepetir,
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, ColorEstudiante),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorEstudiante),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Repetir",
+                                modifier = Modifier.size(14.dp),
+                                tint = ColorEstudiante
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Repetir", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
             }
         }
