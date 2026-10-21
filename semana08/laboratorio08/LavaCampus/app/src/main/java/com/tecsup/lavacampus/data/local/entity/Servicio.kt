@@ -11,6 +11,6 @@ data class Servicio(
     val descripcion: String,
     val precio: Double,
     val unidad: String,
-    val categoria: String,
+    val categoria: String = "General",
     val activo: Boolean = true
 )

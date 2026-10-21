@@ -23,6 +23,41 @@ class LavaRepositoryRoom(
     private val pedidoDao = db.pedidoDao()
     private val detalleDao = db.detalleDao()
 
+    override suspend fun resetearServiciosAPrototipo() {
+        db.withTransaction {
+            val serviciosCorrectos = listOf(
+                Servicio(
+                    id = 1,
+                    nombre = "Lavado y secado",
+                    descripcion = "Servicio completo de lavado y secado",
+                    precio = 8.00,
+                    unidad = "kg",
+                    categoria = "Lavado",
+                    activo = true
+                ),
+                Servicio(
+                    id = 2,
+                    nombre = "Planchado",
+                    descripcion = "Planchado por prenda",
+                    precio = 2.50,
+                    unidad = "prenda",
+                    categoria = "Planchado",
+                    activo = true
+                ),
+                Servicio(
+                    id = 3,
+                    nombre = "Lavado en seco",
+                    descripcion = "Tratamiento especial para prendas delicadas",
+                    precio = 12.00,
+                    unidad = "prenda",
+                    categoria = "Seco",
+                    activo = true
+                )
+            )
+            servicioDao.insertarTodos(serviciosCorrectos)
+        }
+    }
+
     override suspend fun login(correo: String, clave: String): Usuario? {
         return usuarioDao.login(correo, clave)
     }
@@ -41,6 +76,18 @@ class LavaRepositoryRoom(
 
     override suspend fun servicioTieneDetalles(servicioId: Int): Boolean {
         return detalleDao.contarPorServicio(servicioId) > 0
+    }
+
+    override suspend fun insertarServicio(servicio: Servicio) {
+        servicioDao.insertar(servicio)
+    }
+
+    override suspend fun actualizarServicio(servicio: Servicio) {
+        servicioDao.actualizar(servicio)
+    }
+
+    override suspend fun eliminarServicio(servicio: Servicio) {
+        servicioDao.eliminar(servicio)
     }
 
     override suspend fun crearPedido(

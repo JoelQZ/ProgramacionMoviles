@@ -52,22 +52,45 @@ object DatosIniciales {
             db.usuarioDao().insertarTodos(usuarios)
 
             val servicios = listOf(
-                Servicio(id = 1, nombre = "Lavado x Kilo", descripcion = "Ropa general lavada y doblada", precio = 4.50, unidad = "KG", categoria = "Lavado", activo = true),
-                Servicio(id = 2, nombre = "Planchado de Camisa", descripcion = "Planchado a vapor impecable", precio = 3.00, unidad = "UND", categoria = "Planchado", activo = true),
-                Servicio(id = 3, nombre = "Edredón 2 Plazas", descripcion = "Lavado especial y secado", precio = 18.00, unidad = "UND", categoria = "Especial", activo = true)
+                Servicio(
+                    id = 1,
+                    nombre = "Lavado y secado",
+                    descripcion = "Servicio completo de lavado y secado",
+                    precio = 8.00,
+                    unidad = "kg",
+                    categoria = "Lavado",
+                    activo = true
+                ),
+                Servicio(
+                    id = 2,
+                    nombre = "Planchado",
+                    descripcion = "Planchado por prenda",
+                    precio = 2.50,
+                    unidad = "prenda",
+                    categoria = "Planchado",
+                    activo = true
+                ),
+                Servicio(
+                    id = 3,
+                    nombre = "Lavado en seco",
+                    descripcion = "Tratamiento especial para prendas delicadas",
+                    precio = 12.00,
+                    unidad = "prenda",
+                    categoria = "Seco",
+                    activo = true
+                )
             )
             db.servicioDao().insertarTodos(servicios)
 
-            val p1 = Pedido(id = 1, usuarioId = 2, fechaRegistro = hace3Dias, fechaEntrega = hoy, estado = EstadoPedido.ENTREGADO.name, total = 12.00, casillero = "C-01", pagado = true)
-            val p2 = Pedido(id = 2, usuarioId = 3, fechaRegistro = hoy, fechaEntrega = hoy, estado = EstadoPedido.LISTO.name, total = 18.00, casillero = "C-02", pagado = false)
+            val p1 = Pedido(id = 1, usuarioId = 2, fechaRegistro = hace3Dias, fechaEntrega = hoy, estado = EstadoPedido.ENTREGADO.name, total = 16.00, casillero = "C-01", pagado = true)
+            val p2 = Pedido(id = 2, usuarioId = 3, fechaRegistro = hoy, fechaEntrega = hoy, estado = EstadoPedido.LISTO.name, total = 12.00, casillero = "C-02", pagado = false)
 
             db.pedidoDao().insertar(p1)
             db.pedidoDao().insertar(p2)
 
             val detalles = listOf(
-                DetallePedido(id = 1, pedidoId = 1, servicioId = 1, cantidad = 2.0, precioUnitario = 4.50, subtotal = 9.00),
-                DetallePedido(id = 2, pedidoId = 1, servicioId = 2, cantidad = 1.0, precioUnitario = 3.00, subtotal = 3.00),
-                DetallePedido(id = 3, pedidoId = 2, servicioId = 3, cantidad = 1.0, precioUnitario = 18.00, subtotal = 18.00)
+                DetallePedido(id = 1, pedidoId = 1, servicioId = 1, cantidad = 2.0, precioUnitario = 8.00, subtotal = 16.00),
+                DetallePedido(id = 2, pedidoId = 2, servicioId = 3, cantidad = 1.0, precioUnitario = 12.00, subtotal = 12.00)
             )
             db.detalleDao().insertarTodos(detalles)
         }

@@ -20,6 +20,8 @@ class PreferenciasStore(private val context: Context) {
         val USUARIO_ID = intPreferencesKey("usuario_id")
         val MODO_OSCURO = booleanPreferencesKey("modo_oscuro")
         val NOTIFICACIONES = booleanPreferencesKey("notificaciones")
+        val NOTIFICACIONES_ESTUDIANTE = booleanPreferencesKey("notificaciones_estudiante")
+        val NOTIFICACIONES_ADMIN = booleanPreferencesKey("notificaciones_admin")
         val RECIBIR_PEDIDOS = booleanPreferencesKey("recibir_pedidos")
     }
 
@@ -35,9 +37,15 @@ class PreferenciasStore(private val context: Context) {
         preferences[MODO_OSCURO] ?: false
     }
 
-    val notificaciones: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[NOTIFICACIONES] ?: true
+    val notificacionesEstudiante: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICACIONES_ESTUDIANTE] ?: preferences[NOTIFICACIONES] ?: true
     }
+
+    val notificacionesAdmin: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[NOTIFICACIONES_ADMIN] ?: true
+    }
+
+    val notificaciones: Flow<Boolean> = notificacionesEstudiante
 
     val recibirPedidos: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[RECIBIR_PEDIDOS] ?: true
@@ -56,10 +64,21 @@ class PreferenciasStore(private val context: Context) {
         }
     }
 
-    suspend fun guardarNotificaciones(b: Boolean) {
+    suspend fun guardarNotificacionesEstudiante(b: Boolean) {
         context.dataStore.edit { preferences ->
+            preferences[NOTIFICACIONES_ESTUDIANTE] = b
             preferences[NOTIFICACIONES] = b
         }
+    }
+
+    suspend fun guardarNotificacionesAdmin(b: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[NOTIFICACIONES_ADMIN] = b
+        }
+    }
+
+    suspend fun guardarNotificaciones(b: Boolean) {
+        guardarNotificacionesEstudiante(b)
     }
 
     suspend fun guardarRecibirPedidos(b: Boolean) {

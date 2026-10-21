@@ -1,6 +1,7 @@
 package com.tecsup.lavacampus.ui.administrador
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -38,6 +39,7 @@ fun GestionPedidoScreen(
     val errorMsg by viewModel.mensajeError.collectAsState()
 
     val todosCasilleros = remember { (1..8).map { String.format(Locale.US, "C-%02d", it) } }
+    val esOscuro = isSystemInDarkTheme()
 
     Scaffold(
         topBar = {
@@ -48,19 +50,24 @@ fun GestionPedidoScreen(
                             "Gestionar pedido #${item?.pedido?.id?.let { String.format(Locale.US, "%03d", it) } ?: ""}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(end = 48.dp)
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onVolver) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         },
-        containerColor = Color(0xFFF8FAFC)
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         if (item == null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -88,7 +95,7 @@ fun GestionPedidoScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Row(
                             modifier = Modifier.padding(14.dp),
@@ -97,7 +104,7 @@ fun GestionPedidoScreen(
                             Surface(
                                 modifier = Modifier.size(42.dp),
                                 shape = CircleShape,
-                                color = Color(0xFFF1F5F9)
+                                color = ColorAdministrador.copy(alpha = 0.15f)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
@@ -109,8 +116,17 @@ fun GestionPedidoScreen(
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(u?.nombre ?: "Estudiante", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                                Text(u?.codigo ?: "", fontSize = 12.sp, color = Color.Gray)
+                                Text(
+                                    u?.nombre ?: "Estudiante",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    u?.codigo ?: "",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                             EstadoPedidoChip(estado = estadoEnum)
                         }
@@ -121,10 +137,13 @@ fun GestionPedidoScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            StepperEstado(estadoActual = estadoEnum)
+                            StepperEstado(
+                                estadoActual = estadoEnum,
+                                colorActivo = ColorAdministrador
+                            )
                         }
                     }
                 }
@@ -132,7 +151,12 @@ fun GestionPedidoScreen(
                 if (estUpper == "EN_PROCESO" || estUpper == "LISTO") {
                     item {
                         Column {
-                            Text("Casillero para el recojo", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(
+                                "Casillero para el recojo",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
                             Spacer(modifier = Modifier.height(6.dp))
 
                             LazyVerticalGrid(
@@ -153,8 +177,10 @@ fun GestionPedidoScreen(
                                         colors = FilterChipDefaults.filterChipColors(
                                             selectedContainerColor = ColorAdministrador,
                                             selectedLabelColor = Color.White,
-                                            disabledContainerColor = Color(0xFFF1F5F9),
-                                            disabledLabelColor = Color.LightGray
+                                            containerColor = MaterialTheme.colorScheme.surface,
+                                            labelColor = MaterialTheme.colorScheme.onSurface,
+                                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
                                         )
                                     )
                                 }
@@ -167,7 +193,7 @@ fun GestionPedidoScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Row(
                             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -175,16 +201,32 @@ fun GestionPedidoScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column {
-                                Text("Total S/ ${String.format(Locale.US, "%.2f", p.total)}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                Text("Se cobra al entregar", fontSize = 11.sp, color = Color.Gray)
+                                Text(
+                                    "Total S/ ${String.format(Locale.US, "%.2f", p.total)}",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    "Se cobra al entregar",
+                                    fontSize = 11.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("Cobrado", fontSize = 12.sp, color = Color.Gray)
+                                Text(
+                                    "Cobrado",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Switch(
                                     checked = estaPagado,
                                     onCheckedChange = { viewModel.marcarPagado(it) },
-                                    colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = ColorAdministrador)
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = Color.White,
+                                        checkedTrackColor = ColorAdministrador
+                                    )
                                 )
                             }
                         }
@@ -192,15 +234,18 @@ fun GestionPedidoScreen(
                 }
 
                 item {
+                    val fondoRegla = if (esOscuro) ColorAdministrador.copy(alpha = 0.2f) else Color(0xFFF3EDF7)
+                    val textoRegla = if (esOscuro) Color(0xFFD8B4FE) else ColorAdministrador
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3EDF7))
+                        colors = CardDefaults.cardColors(containerColor = fondoRegla)
                     ) {
                         Text(
                             text = "Regla: no se entrega un pedido sin cobrar, ni se pasa a Listo sin casillero.",
                             fontSize = 11.sp,
-                            color = ColorAdministrador,
+                            color = textoRegla,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(12.dp)
                         )
@@ -209,7 +254,12 @@ fun GestionPedidoScreen(
 
                 if (errorMsg != null) {
                     item {
-                        Text(errorMsg!!, color = MaterialTheme.colorScheme.error, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            errorMsg!!,
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -228,18 +278,18 @@ fun GestionPedidoScreen(
                             modifier = Modifier.fillMaxWidth().height(48.dp),
                             shape = RoundedCornerShape(24.dp)
                         ) {
-                            Text(textoBoton, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text(textoBoton, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
                         }
 
                         if (estUpper == "RECIBIDO" || estUpper == "EN_PROCESO") {
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedButton(
                                 onClick = { viewModel.cancelar() },
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                                border = BorderStroke(1.dp, Color(0xFFEF4444)),
                                 modifier = Modifier.fillMaxWidth().height(48.dp),
                                 shape = RoundedCornerShape(24.dp)
                             ) {
-                                Text("Cancelar pedido", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                                Text("Cancelar pedido", color = Color(0xFFEF4444), fontWeight = FontWeight.Bold)
                             }
                         }
                     }

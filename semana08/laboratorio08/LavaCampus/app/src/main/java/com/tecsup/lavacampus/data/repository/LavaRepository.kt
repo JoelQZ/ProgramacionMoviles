@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface LavaRepository {
 
+    suspend fun resetearServiciosAPrototipo()
+
     suspend fun login(correo: String, clave: String): Usuario?
     fun observarClientes(): Flow<List<ClienteResumen>>
 
@@ -40,4 +42,7 @@ interface LavaRepository {
     suspend fun contarPedidosPorEstado(estado: EstadoPedido): Int
     fun observarIngresosDesde(fechaInicio: String): Flow<Double>
     fun observarIngresosPorServicio(fechaInicio: String): Flow<List<IngresoServicio>>
+    suspend fun insertarServicio(servicio: Servicio)
+    suspend fun actualizarServicio(servicio: Servicio)
+    suspend fun eliminarServicio(servicio: Servicio)
 }

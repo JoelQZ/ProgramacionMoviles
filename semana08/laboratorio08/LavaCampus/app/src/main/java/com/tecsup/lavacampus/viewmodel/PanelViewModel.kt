@@ -2,6 +2,7 @@ package com.tecsup.lavacampus.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.EstadoPedido
 import com.tecsup.lavacampus.ui.graficos.DatoGrafico
@@ -38,6 +39,10 @@ class PanelViewModel(
     val porRecoger: StateFlow<Int> = todosLosPedidos
         .map { lista -> lista.count { it.pedido.estado.uppercase() == EstadoPedido.LISTO.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val pedidosRecibidos: StateFlow<List<PedidoConDetalle>> = todosLosPedidos
+        .map { lista -> lista.filter { it.pedido.estado.uppercase() == EstadoPedido.RECIBIDO.name } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val ingresosSemana: StateFlow<Double> = todosLosPedidos
         .map { lista ->
