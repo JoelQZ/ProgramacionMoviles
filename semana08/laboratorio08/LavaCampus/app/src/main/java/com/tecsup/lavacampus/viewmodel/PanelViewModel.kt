@@ -40,6 +40,16 @@ class PanelViewModel(
         .map { lista -> lista.count { it.pedido.estado.uppercase() == EstadoPedido.LISTO.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    val pedidosAtrasados: StateFlow<Int> = todosLosPedidos
+        .map { lista ->
+            lista.count { item ->
+                val p = item.pedido
+                val est = p.estado.uppercase()
+                p.fechaEntrega < hoyStr && est != EstadoPedido.ENTREGADO.name && est != EstadoPedido.CANCELADO.name
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     val pedidosRecibidos: StateFlow<List<PedidoConDetalle>> = todosLosPedidos
         .map { lista -> lista.filter { it.pedido.estado.uppercase() == EstadoPedido.RECIBIDO.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

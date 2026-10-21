@@ -7,12 +7,15 @@ import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.EstadoPedido
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.util.Locale
 
 class BandejaViewModel(
     private val repository: LavaRepository,
     private val usuarioIdInicial: Int? = null
 ) : ViewModel() {
+
+    private val hoyStr = LocalDate.now().toString()
 
     val textoBusqueda = MutableStateFlow("")
     val filtroEstado = MutableStateFlow("Todos")
@@ -34,8 +37,12 @@ class BandejaViewModel(
                 true
             }
 
+            val estUpper = p.estado.uppercase()
+            val esAtrasado = p.fechaEntrega < hoyStr && estUpper != "ENTREGADO" && estUpper != "CANCELADO"
+
             val cumpleEstado = when (estado) {
                 "Todos" -> true
+                "Atrasados" -> esAtrasado
                 else -> p.estado.equals(estado, ignoreCase = true)
             }
 

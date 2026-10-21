@@ -37,14 +37,16 @@ fun PanelScreen(
     onVerPedidosListos: () -> Unit = {},
     onNavegarTab: (String) -> Unit = {}
 ) {
-    val pedidosHoy by viewModel.pedidosHoy.collectAsState()
-    val enProceso by viewModel.enProceso.collectAsState()
-    val porRecoger by viewModel.porRecoger.collectAsState()
-    val pedidosRecibidos by viewModel.pedidosRecibidos.collectAsState()
-    val ingresosSemana by viewModel.ingresosSemana.collectAsState()
-    val totalPedidosSemana by viewModel.totalPedidosSemana.collectAsState()
-    val porEstado by viewModel.porEstado.collectAsState()
-    val porServicio by viewModel.porServicio.collectAsState()
+    val pedidosHoy by viewModel.pedidosHoy.collectAsState(initial = 0)
+    val enProceso by viewModel.enProceso.collectAsState(initial = 0)
+    val porRecoger by viewModel.porRecoger.collectAsState(initial = 0)
+    val atrasadosState = viewModel.pedidosAtrasados.collectAsState(initial = 0)
+    val pedidosAtrasados = atrasadosState.value
+    val pedidosRecibidos by viewModel.pedidosRecibidos.collectAsState(initial = emptyList())
+    val ingresosSemana by viewModel.ingresosSemana.collectAsState(initial = 0.0)
+    val totalPedidosSemana by viewModel.totalPedidosSemana.collectAsState(initial = 0)
+    val porEstado by viewModel.porEstado.collectAsState(initial = emptyList())
+    val porServicio by viewModel.porServicio.collectAsState(initial = emptyList())
 
     val esOscuro = isSystemInDarkTheme()
 
@@ -114,13 +116,53 @@ fun PanelScreen(
                 val fondoGreen = if (esOscuro) Color(0xFF14532D) else Color(0xFFDCFCE7)
                 val textoGreen = if (esOscuro) Color(0xFFA7F3D0) else Color(0xFF15803D)
 
+                val fondoRed = if (esOscuro) Color(0xFF450A0A) else Color(0xFFFEE2E2)
+                val textoRed = if (esOscuro) Color(0xFFFCA5A5) else Color(0xFFDC2626)
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    TarjetaContador("Pedidos hoy", pedidosHoy, fondoPurple, textoPurple, Modifier.weight(1f))
+                    TarjetaContador("Hoy", pedidosHoy, fondoPurple, textoPurple, Modifier.weight(1f))
                     TarjetaContador("En proceso", enProceso, fondoBlue, textoBlue, Modifier.weight(1f))
                     TarjetaContador("Por recoger", porRecoger, fondoGreen, textoGreen, Modifier.weight(1f))
+                    TarjetaContador("Atrasados", pedidosAtrasados, fondoRed, textoRed, Modifier.weight(1f))
+                }
+            }
+
+            if (pedidosAtrasados > 0) {
+                item {
+                    val fondoAtrasados = if (esOscuro) Color(0xFF450A0A) else Color(0xFFFEE2E2)
+                    val textoAtrasados1 = if (esOscuro) Color(0xFFFCA5A5) else Color(0xFFDC2626)
+                    val textoAtrasados2 = if (esOscuro) Color(0xFFFECACA) else Color(0xFFB91C1C)
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = fondoAtrasados)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "⚠️ $pedidosAtrasados pedido${if (pedidosAtrasados > 1) "s" else ""} atrasado${if (pedidosAtrasados > 1) "s" else ""}",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp,
+                                    color = textoAtrasados1
+                                )
+                                Text(
+                                    "Fecha de entrega vencida sin finalizar",
+                                    fontSize = 11.sp,
+                                    color = textoAtrasados2
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -252,12 +294,12 @@ private fun TarjetaContador(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(vertical = 12.dp, horizontal = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("$valor", fontWeight = FontWeight.Bold, fontSize = 22.sp, color = textoColor)
+            Text("$valor", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = textoColor)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(titulo, fontSize = 11.sp, color = textoColor, fontWeight = FontWeight.Medium)
+            Text(titulo, fontSize = 10.sp, color = textoColor, fontWeight = FontWeight.Medium)
         }
     }
 }

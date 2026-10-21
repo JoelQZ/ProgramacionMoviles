@@ -2,14 +2,12 @@ package com.tecsup.lavacampus.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.model.EstadoPedido
 import com.tecsup.lavacampus.ui.theme.ColorEstudiante
+import java.time.LocalDate
 import java.util.Locale
 
 @Composable
@@ -32,6 +31,10 @@ fun PedidoCard(
     val estStr = p.estado.uppercase()
     val esListo = estStr == "LISTO"
     val esRecibido = estStr == "RECIBIDO"
+
+    val hoyStr = remember { LocalDate.now().toString() }
+    val esAtrasado = p.fechaEntrega < hoyStr && estStr != "ENTREGADO" && estStr != "CANCELADO"
+    val esOscuro = isSystemInDarkTheme()
 
     val estadoEnum = try {
         EstadoPedido.valueOf(estStr)
@@ -51,15 +54,21 @@ fun PedidoCard(
         "$cantFormatted $unStr"
     }
 
+    val bordeCardColor = when {
+        esAtrasado -> Color(0xFFEF4444)
+        esListo -> Color(0xFF22C55E)
+        else -> MaterialTheme.colorScheme.outlineVariant
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(
-            width = if (esListo) 1.5.dp else 1.dp,
-            color = if (esListo) Color(0xFF22C55E) else Color(0xFFF1F5F9)
+            width = if (esAtrasado || esListo) 1.5.dp else 1.dp,
+            color = bordeCardColor
         )
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
@@ -77,17 +86,37 @@ fun PedidoCard(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
-                        Text("Pedido #${String.format(Locale.US, "%03d", p.id)}", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                        Text(resumenDetalle, fontSize = 11.sp, color = Color.Gray)
+                        Text(
+                            "Pedido #${String.format(Locale.US, "%03d", p.id)}",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            resumenDetalle,
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
 
-                Text(
-                    String.format(Locale.US, "S/ %.2f", p.total),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = ColorEstudiante
-                )
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        String.format(Locale.US, "S/ %.2f", p.total),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = ColorEstudiante
+                    )
+                    if (esAtrasado) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            "Venció ${p.fechaEntrega}",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFEF4444)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -97,7 +126,26 @@ fun PedidoCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                EstadoPedidoChip(estado = estadoEnum)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    EstadoPedidoChip(estado = estadoEnum)
+                    if (esAtrasado) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (esOscuro) Color(0xFF450A0A) else Color(0xFFFEE2E2)
+                        ) {
+                            Text(
+                                text = "ATRASADO",
+                                color = if (esOscuro) Color(0xFFFCA5A5) else Color(0xFFDC2626),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                }
 
                 if (esListo && !p.casillero.isNullOrBlank()) {
                     Button(
@@ -121,7 +169,7 @@ fun PedidoCard(
                     Text(
                         "Entrega ${p.fechaEntrega}",
                         fontSize = 11.sp,
-                        color = ColorEstudiante,
+                        color = if (esAtrasado) Color(0xFFEF4444) else ColorEstudiante,
                         fontWeight = FontWeight.Medium
                     )
                 }

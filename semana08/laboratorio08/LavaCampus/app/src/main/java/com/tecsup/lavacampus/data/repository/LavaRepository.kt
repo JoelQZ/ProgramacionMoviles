@@ -40,6 +40,7 @@ interface LavaRepository {
 
     suspend fun contarPedidosPorFecha(fecha: String): Int
     suspend fun contarPedidosPorEstado(estado: EstadoPedido): Int
+    suspend fun contarPedidosAtrasados(fechaHoy: String): Int
     fun observarIngresosDesde(fechaInicio: String): Flow<Double>
     fun observarIngresosPorServicio(fechaInicio: String): Flow<List<IngresoServicio>>
     suspend fun insertarServicio(servicio: Servicio)

@@ -178,6 +178,10 @@ class LavaRepositoryRoom(
         return pedidoDao.contarPorEstado(estado.name)
     }
 
+    override suspend fun contarPedidosAtrasados(fechaHoy: String): Int {
+        return pedidoDao.contarAtrasados(fechaHoy)
+    }
+
     override fun observarIngresosDesde(fechaInicio: String): Flow<Double> {
         return pedidoDao.ingresosDesde(fechaInicio)
     }

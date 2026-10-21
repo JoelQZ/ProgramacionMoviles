@@ -47,6 +47,9 @@ interface PedidoDao {
     @Query("SELECT COUNT(*) FROM pedidos WHERE estado = :estado")
     suspend fun contarPorEstado(estado: String): Int
 
+    @Query("SELECT COUNT(*) FROM pedidos WHERE fechaEntrega < :fechaHoy AND estado NOT IN ('ENTREGADO', 'CANCELADO')")
+    suspend fun contarAtrasados(fechaHoy: String): Int
+
     @Query("SELECT COALESCE(SUM(total), 0.0) FROM pedidos WHERE pagado = 1 AND fechaRegistro >= :fechaInicio")
     fun ingresosDesde(fechaInicio: String): Flow<Double>
 }
