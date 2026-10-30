@@ -25,7 +25,8 @@ import com.tecsup.lavacampus.ui.theme.ColorEstudiante
 
 @Composable
 fun SplashScreen(
-    onComenzar: () -> Unit
+    onComenzar: () -> Unit,
+    onLogin: () -> Unit
 ) {
     var animacionIniciada by remember { mutableStateOf(false) }
     val alfa by animateFloatAsState(
@@ -132,7 +133,7 @@ fun SplashScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                TextButton(onClick = onComenzar) {
+                TextButton(onClick = onLogin) {
                     Text(
                         text = "Ya tengo una cuenta",
                         fontSize = 13.sp,

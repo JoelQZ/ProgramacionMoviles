@@ -15,6 +15,8 @@ interface LavaRepository {
     suspend fun resetearServiciosAPrototipo()
 
     suspend fun login(correo: String, clave: String): Usuario?
+    suspend fun registrarUsuario(usuario: Usuario): Long
+    suspend fun obtenerUsuarioPorCorreo(correo: String): Usuario?
     fun observarClientes(): Flow<List<ClienteResumen>>
 
     fun observarServiciosActivos(): Flow<List<Servicio>>

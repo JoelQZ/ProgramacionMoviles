@@ -33,6 +33,7 @@ import com.tecsup.lavacampus.ui.estudiante.LoginScreen
 import com.tecsup.lavacampus.ui.estudiante.MisPedidosScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.PerfilScreen
+import com.tecsup.lavacampus.ui.estudiante.RegistroScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.estudiante.TarifasScreen
 import com.tecsup.lavacampus.ui.theme.ColorEstudiante
@@ -44,6 +45,7 @@ import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.MisPedidosViewModel
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
 import com.tecsup.lavacampus.viewmodel.PanelViewModel
+import com.tecsup.lavacampus.viewmodel.RegistroViewModel
 import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
 
@@ -62,6 +64,11 @@ fun NavLava(
         composable(Rutas.SPLASH) {
             SplashScreen(
                 onComenzar = {
+                    navController.navigate(Rutas.REGISTRO) {
+                        popUpTo(Rutas.SPLASH) { inclusive = true }
+                    }
+                },
+                onLogin = {
                     navController.navigate(Rutas.LOGIN) {
                         popUpTo(Rutas.SPLASH) { inclusive = true }
                     }
@@ -78,6 +85,37 @@ fun NavLava(
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
                     } else {
+                        navController.navigate(Rutas.INICIO_ESTUDIANTE) {
+                            popUpTo(Rutas.LOGIN) { inclusive = true }
+                        }
+                    }
+                },
+                onNavegarRegistro = {
+                    navController.navigate(Rutas.REGISTRO)
+                }
+            )
+        }
+
+        composable(Rutas.REGISTRO) {
+            val registroViewModel: RegistroViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    @Suppress("UNCHECKED_CAST")
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return RegistroViewModel(repository) as T
+                    }
+                }
+            )
+
+            RegistroScreen(
+                viewModel = registroViewModel,
+                onVolver = { navController.popBackStack() },
+                onIrALogin = {
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(Rutas.REGISTRO) { inclusive = true }
+                    }
+                },
+                onRegistroExitoso = { usuario ->
+                    sesionViewModel.login(usuario.correo, usuario.clave, Rol.CLIENTE) {
                         navController.navigate(Rutas.INICIO_ESTUDIANTE) {
                             popUpTo(Rutas.LOGIN) { inclusive = true }
                         }
