@@ -64,13 +64,25 @@ fun ListaScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Smartphones") },
+                title = {
+                    Text(
+                        text = "⚡ CYBER_SMARTPHONES",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                },
                 actions = {
-                    TextButton(onClick = onVerFavoritos) { Text("♥ Favoritos") }
-                    if (esAdmin) {
-                        TextButton(onClick = onAbrirAdmin) { Text("Admin") }
+                    TextButton(onClick = onVerFavoritos) {
+                        Text("♥ Favoritos", color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
                     }
-                    TextButton(onClick = onCerrarSesion) { Text("Salir") }
+                    if (esAdmin) {
+                        TextButton(onClick = onAbrirAdmin) {
+                            Text("⚙ Admin", color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    TextButton(onClick = onCerrarSesion) {
+                        Text("Salir", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             )
         }
@@ -88,19 +100,19 @@ fun ListaScreen(
                     AvisoSinConexion(texto = texto, onReintentar = viewModel::refrescar)
                 }
 
-                // Campo de búsqueda con icono de lupa y botón de limpiar
+                // Campo de búsqueda futurista con neón
                 OutlinedTextField(
                     value = queryBusqueda,
                     onValueChange = viewModel::onBusquedaChanged,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    placeholder = { Text("Buscar smartphones...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+                    placeholder = { Text("Buscar smartphones neón...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.secondary) },
                     trailingIcon = {
                         if (queryBusqueda.isNotBlank()) {
                             IconButton(onClick = { viewModel.onBusquedaChanged("") }) {
-                                Icon(Icons.Default.Close, contentDescription = "Limpiar búsqueda")
+                                Icon(Icons.Default.Close, contentDescription = "Limpiar", tint = MaterialTheme.colorScheme.tertiary)
                             }
                         }
                     },
@@ -113,7 +125,7 @@ fun ListaScreen(
                         val mensajeVacio = if (queryBusqueda.isNotBlank()) {
                             "No se encontraron smartphones con ese término"
                         } else {
-                            "No hay productos"
+                            "No hay productos disponibles"
                         }
                         Text(
                             text = mensajeVacio,
@@ -125,7 +137,7 @@ fun ListaScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(e.datos, key = { it.id }) { item ->
                             ItemFila(
@@ -165,11 +177,12 @@ fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -177,27 +190,29 @@ fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
                 contentDescription = item.titulo,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .size(76.dp)
+                    .clip(RoundedCornerShape(14.dp))
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.titulo,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                // Badge visual que resalta la marca (subtitulo)
+                Spacer(modifier = Modifier.height(6.dp))
+                // Badge de marca vibrante
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     Text(
                         text = item.subtitulo,
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                     )
                 }
             }
