@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "560174577881",
+    "project_id": "catalogoramos-b9583",
+    "storage_bucket": "catalogoramos-b9583.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:560174577881:android:886a580ef92635856366c8",
+        "android_client_info": {
+          "package_name": "com.tecsup.catalogo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhtxckzHt8jyVhOyOyc1sbHEsC7Hijr2Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
