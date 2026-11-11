@@ -9,15 +9,25 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -25,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -48,6 +59,7 @@ fun ListaScreen(
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val aviso by viewModel.aviso.collectAsStateWithLifecycle()
+    val queryBusqueda by viewModel.queryBusqueda.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -75,15 +87,45 @@ fun ListaScreen(
                 aviso?.let { texto ->
                     AvisoSinConexion(texto = texto, onReintentar = viewModel::refrescar)
                 }
+
+                // Campo de búsqueda con icono de lupa y botón de limpiar
+                OutlinedTextField(
+                    value = queryBusqueda,
+                    onValueChange = viewModel::onBusquedaChanged,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    placeholder = { Text("Buscar smartphones...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+                    trailingIcon = {
+                        if (queryBusqueda.isNotBlank()) {
+                            IconButton(onClick = { viewModel.onBusquedaChanged("") }) {
+                                Icon(Icons.Default.Close, contentDescription = "Limpiar búsqueda")
+                            }
+                        }
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    singleLine = true
+                )
+
                 if (e.datos.isEmpty()) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No hay productos")
+                        val mensajeVacio = if (queryBusqueda.isNotBlank()) {
+                            "No se encontraron smartphones con ese término"
+                        } else {
+                            "No hay productos"
+                        }
+                        Text(
+                            text = mensajeVacio,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(e.datos, key = { it.id }) { item ->
                             ItemFila(
@@ -120,7 +162,12 @@ fun AvisoSinConexion(texto: String, onReintentar: () -> Unit) {
 
 @Composable
 fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
-    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -129,7 +176,9 @@ fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
                 model = item.imagenUrl,
                 contentDescription = item.titulo,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(64.dp)
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(RoundedCornerShape(12.dp))
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -138,10 +187,19 @@ fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = item.subtitulo,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                // Badge visual que resalta la marca (subtitulo)
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = item.subtitulo,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
             }
             BotonFavorito(esFavorito = item.esFavorito, onClick = onFavorito)
         }

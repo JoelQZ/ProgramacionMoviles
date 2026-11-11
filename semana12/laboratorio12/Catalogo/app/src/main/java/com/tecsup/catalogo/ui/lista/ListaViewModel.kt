@@ -28,15 +28,37 @@ class ListaViewModel(
     private val _aviso = MutableStateFlow<String?>(null)
     val aviso: StateFlow<String?> = _aviso.asStateFlow()
 
+    private val _queryBusqueda = MutableStateFlow("")
+    val queryBusqueda: StateFlow<String> = _queryBusqueda.asStateFlow()
+
+    private var listaCache = listOf<Item>()
     private var refrescoTerminado = false
 
     init {
         viewModelScope.launch {
             repo.items.collect { lista ->
-                if (lista.isNotEmpty() || refrescoTerminado) _estado.value = UiState.Exito(lista)
+                listaCache = lista
+                if (lista.isNotEmpty() || refrescoTerminado) {
+                    _estado.value = UiState.Exito(filtrarLista(lista, _queryBusqueda.value))
+                }
             }
         }
         refrescar()
+    }
+
+    fun onBusquedaChanged(nuevaQuery: String) {
+        _queryBusqueda.value = nuevaQuery
+        if (_estado.value is UiState.Exito || listaCache.isNotEmpty() || refrescoTerminado) {
+            _estado.value = UiState.Exito(filtrarLista(listaCache, nuevaQuery))
+        }
+    }
+
+    private fun filtrarLista(lista: List<Item>, query: String): List<Item> {
+        if (query.isBlank()) return lista
+        return lista.filter {
+            it.titulo.contains(query, ignoreCase = true) ||
+            it.subtitulo.contains(query, ignoreCase = true)
+        }
     }
 
     fun refrescar() {
@@ -46,7 +68,9 @@ class ListaViewModel(
             refrescoTerminado = true
             resultado
                 .onSuccess { n ->
-                    if (_estado.value is UiState.Cargando) _estado.value = UiState.Exito(emptyList())
+                    if (_estado.value is UiState.Cargando) {
+                        _estado.value = UiState.Exito(filtrarLista(listaCache, _queryBusqueda.value))
+                    }
                     _aviso.value = null
                     notificador.mostrar("Datos actualizados", "Se guardaron $n elementos")
                 }
