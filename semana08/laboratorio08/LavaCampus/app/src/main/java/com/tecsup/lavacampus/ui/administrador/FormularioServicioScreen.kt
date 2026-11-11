@@ -27,6 +27,7 @@ import com.tecsup.lavacampus.ui.theme.ColorAdministrador
 @Composable
 fun FormularioServicioScreen(
     servicioAEditar: Servicio? = null,
+    colorTema: Color = ColorAdministrador,
     onVolver: () -> Unit,
     onGuardar: (Int?, String, String, Double, String, Boolean) -> Unit
 ) {
@@ -106,12 +107,12 @@ fun FormularioServicioScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedBorderColor = ColorAdministrador,
+                    focusedBorderColor = colorTema,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    focusedLabelColor = ColorAdministrador
+                    focusedLabelColor = colorTema
                 )
             )
 
@@ -134,7 +135,7 @@ fun FormularioServicioScreen(
                             label = { Text(u, fontSize = 12.sp) },
                             modifier = Modifier.weight(1f),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = ColorAdministrador,
+                                selectedContainerColor = colorTema,
                                 selectedLabelColor = Color.White,
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 labelColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -153,12 +154,12 @@ fun FormularioServicioScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedBorderColor = ColorAdministrador,
+                    focusedBorderColor = colorTema,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    focusedLabelColor = ColorAdministrador
+                    focusedLabelColor = colorTema
                 )
             )
 
@@ -181,7 +182,7 @@ fun FormularioServicioScreen(
                             label = { Text(t, fontSize = 12.sp) },
                             modifier = Modifier.weight(1f),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = ColorAdministrador,
+                                selectedContainerColor = colorTema,
                                 selectedLabelColor = Color.White,
                                 containerColor = MaterialTheme.colorScheme.surface,
                                 labelColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -200,12 +201,12 @@ fun FormularioServicioScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedBorderColor = ColorAdministrador,
+                    focusedBorderColor = colorTema,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    focusedLabelColor = ColorAdministrador
+                    focusedLabelColor = colorTema
                 )
             )
 
@@ -229,17 +230,17 @@ fun FormularioServicioScreen(
                                 .height(52.dp)
                                 .clickable { iconoSeleccionado = idx },
                             shape = RoundedCornerShape(12.dp),
-                            color = if (esSel) ColorAdministrador.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface,
+                            color = if (esSel) colorTema.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface,
                             border = BorderStroke(
                                 width = if (esSel) 2.dp else 1.dp,
-                                color = if (esSel) ColorAdministrador else MaterialTheme.colorScheme.outlineVariant
+                                color = if (esSel) colorTema else MaterialTheme.colorScheme.outlineVariant
                             )
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = icon,
                                     contentDescription = null,
-                                    tint = if (esSel) ColorAdministrador else MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = if (esSel) colorTema else MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -276,7 +277,7 @@ fun FormularioServicioScreen(
                         checked = activo,
                         onCheckedChange = { activo = it },
                         colors = SwitchDefaults.colors(
-                            checkedTrackColor = ColorAdministrador,
+                            checkedTrackColor = colorTema,
                             checkedThumbColor = Color.White
                         )
                     )
@@ -299,7 +300,7 @@ fun FormularioServicioScreen(
                         onVolver()
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = ColorAdministrador),
+                colors = ButtonDefaults.buttonColors(containerColor = colorTema),
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(24.dp)
             ) {
@@ -308,11 +309,11 @@ fun FormularioServicioScreen(
 
             OutlinedButton(
                 onClick = onVolver,
-                border = BorderStroke(1.dp, ColorAdministrador),
+                border = BorderStroke(1.dp, colorTema),
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(24.dp)
             ) {
-                Text("Cancelar", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = ColorAdministrador)
+                Text("Cancelar", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = colorTema)
             }
         }
     }

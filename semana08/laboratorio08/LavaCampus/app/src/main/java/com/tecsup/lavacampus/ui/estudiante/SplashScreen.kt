@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.tecsup.lavacampus.ui.components.obtenerBrushFondoLavacampus
 import com.tecsup.lavacampus.ui.theme.ColorEstudiante
 
 @Composable
@@ -34,6 +35,8 @@ fun SplashScreen(
         label = "AlphaSplash"
     )
 
+    val brushFondo = obtenerBrushFondoLavacampus()
+
     LaunchedEffect(Unit) {
         animacionIniciada = true
     }
@@ -41,22 +44,22 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(brushFondo)
     ) {
         Box(
             modifier = Modifier
-                .size(160.dp)
-                .offset(x = (-30).dp, y = 40.dp)
+                .size(180.dp)
+                .offset(x = (-30).dp, y = 30.dp)
                 .clip(CircleShape)
-                .background(ColorEstudiante.copy(alpha = 0.15f))
+                .background(Color.White.copy(alpha = 0.12f))
         )
         Box(
             modifier = Modifier
-                .size(100.dp)
+                .size(120.dp)
                 .align(Alignment.TopEnd)
-                .offset(x = 20.dp, y = 80.dp)
+                .offset(x = 20.dp, y = 70.dp)
                 .clip(CircleShape)
-                .background(ColorEstudiante.copy(alpha = 0.12f))
+                .background(Color.White.copy(alpha = 0.10f))
         )
 
         Column(
@@ -74,14 +77,15 @@ fun SplashScreen(
             ) {
                 Surface(
                     modifier = Modifier.size(100.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    color = ColorEstudiante
+                    shape = RoundedCornerShape(26.dp),
+                    color = Color.White,
+                    shadowElevation = 8.dp
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.LocalLaundryService,
                             contentDescription = "Logo",
-                            tint = Color.White,
+                            tint = ColorEstudiante,
                             modifier = Modifier.size(56.dp)
                         )
                     }
@@ -91,17 +95,18 @@ fun SplashScreen(
 
                 Text(
                     text = "LavaCampus",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
                     text = "Tu ropa limpia, sin salir del campus",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 15.sp,
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontWeight = FontWeight.Medium
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -123,11 +128,15 @@ fun SplashScreen(
                     onClick = onComenzar,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ColorEstudiante)
+                        .height(52.dp),
+                    shape = RoundedCornerShape(26.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = ColorEstudiante
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
                 ) {
-                    Text("Comenzar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("Comenzar", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = ColorEstudiante)
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -135,9 +144,9 @@ fun SplashScreen(
                 TextButton(onClick = onComenzar) {
                     Text(
                         text = "Ya tengo una cuenta",
-                        fontSize = 13.sp,
-                        color = ColorEstudiante,
-                        fontWeight = FontWeight.Medium
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -149,9 +158,10 @@ fun SplashScreen(
 @Composable
 private fun TarjetaServicioSplash(icono: ImageVector, etiqueta: String) {
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.size(width = 85.dp, height = 75.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        modifier = Modifier.size(width = 90.dp, height = 80.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -162,7 +172,7 @@ private fun TarjetaServicioSplash(icono: ImageVector, etiqueta: String) {
                 imageVector = icono,
                 contentDescription = null,
                 tint = ColorEstudiante,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(26.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

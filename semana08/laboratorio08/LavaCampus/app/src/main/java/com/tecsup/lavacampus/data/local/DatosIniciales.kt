@@ -19,6 +19,7 @@ object DatosIniciales {
                 Usuario(
                     id = 1,
                     nombre = "Facundo Zevallos",
+                    apellido = "Zevallos",
                     codigo = "ADM001",
                     correo = "facundo.zevallos@admin.com",
                     clave = "12345",
@@ -27,6 +28,7 @@ object DatosIniciales {
                 Usuario(
                     id = 2,
                     nombre = "Juan Pérez",
+                    apellido = "Pérez",
                     codigo = "20230001",
                     correo = "juan.perez@tecsup.edu.pe",
                     clave = "123456",
@@ -35,6 +37,7 @@ object DatosIniciales {
                 Usuario(
                     id = 3,
                     nombre = "Maria López",
+                    apellido = "López",
                     codigo = "20230002",
                     correo = "maria.lopez@tecsup.edu.pe",
                     clave = "123456",
@@ -43,10 +46,20 @@ object DatosIniciales {
                 Usuario(
                     id = 4,
                     nombre = "Joel Quijada",
+                    apellido = "Quijada",
                     codigo = "20230003",
                     correo = "joel.quijada@tecsup.edu.pe",
                     clave = "123456",
                     rol = Rol.CLIENTE.name
+                ),
+                Usuario(
+                    id = 5,
+                    nombre = "Soporte Técnico",
+                    apellido = "Técnico",
+                    codigo = "SOP001",
+                    correo = "soporte@tecsup.edu.pe",
+                    clave = "123456",
+                    rol = Rol.SOPORTE.name
                 )
             )
             db.usuarioDao().insertarTodos(usuarios)

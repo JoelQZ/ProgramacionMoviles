@@ -6,14 +6,12 @@ plugins {
 
 android {
     namespace = "com.tecsup.authfirebaseappjoel"
-    compileSdk {
-        version = release(37)
-    }
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.tecsup.authfirebaseappjoel"
         minSdk = 26
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -43,6 +41,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
 
     implementation("androidx.navigation:navigation-compose:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.compose.material:material-icons-extended")
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

@@ -26,7 +26,8 @@ import com.tecsup.lavacampus.viewmodel.SesionViewModel
 @Composable
 fun LoginScreen(
     viewModel: SesionViewModel,
-    onLoginExitoso: (String) -> Unit
+    onLoginExitoso: (String) -> Unit,
+    onNavegarRegistro: () -> Unit = {}
 ) {
     var rolSeleccionado by remember { mutableStateOf(Rol.CLIENTE) }
 
@@ -197,7 +198,8 @@ fun LoginScreen(
                         text = "Regístrate",
                         color = colorRol,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontSize = 13.sp,
+                        modifier = Modifier.clickable { onNavegarRegistro() }
                     )
                 }
             }

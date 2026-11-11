@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 class SesionViewModel(
     private val repository: LavaRepository,
@@ -44,10 +43,15 @@ class SesionViewModel(
                 val rolCoincide = when (rolSeleccionado) {
                     Rol.CLIENTE -> rolUsuarioUpper == "CLIENTE" || rolUsuarioUpper == "ESTUDIANTE"
                     Rol.ADMIN -> rolUsuarioUpper == "ADMIN" || rolUsuarioUpper == "ADMINISTRADOR"
+                    Rol.SOPORTE -> rolUsuarioUpper == "SOPORTE"
                 }
 
                 if (!rolCoincide) {
-                    val nombreRol = if (rolSeleccionado == Rol.CLIENTE) "Estudiante" else "Administrador"
+                    val nombreRol = when (rolSeleccionado) {
+                        Rol.CLIENTE -> "Estudiante"
+                        Rol.ADMIN -> "Administrador"
+                        Rol.SOPORTE -> "Soporte"
+                    }
                     _error.value = "El usuario no corresponde al rol de $nombreRol"
                 } else {
                     _error.value = null
