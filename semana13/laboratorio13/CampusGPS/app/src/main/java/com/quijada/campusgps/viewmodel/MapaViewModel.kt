@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quijada.campusgps.data.LugaresRepository
 import com.quijada.campusgps.data.UbicacionRepository
+import com.quijada.campusgps.model.Lugar
 import com.quijada.campusgps.model.TipoError
 import com.quijada.campusgps.model.UbicacionUi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +19,13 @@ class MapaViewModel(
 
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
     val estado: StateFlow<UbicacionUi> = _estado.asStateFlow()
+
+    private val _lugares = MutableStateFlow<List<Lugar>>(emptyList())
+    val lugares: StateFlow<List<Lugar>> = _lugares.asStateFlow()
+
+    init {
+        _lugares.value = lugaresRepo.obtenerLugares()
+    }
 
     fun buscar() {
         viewModelScope.launch {

@@ -58,6 +58,7 @@ private fun tienePermisoUbicacion(context: Context): Boolean {
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
+    val lugares by vm.lugares.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -116,6 +117,7 @@ fun PantallaMapa(vm: MapaViewModel) {
         ) {
             MapaUbicacion(
                 posicionActual = (estado as? UbicacionUi.Lista)?.posicion,
+                lugares = lugares,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
