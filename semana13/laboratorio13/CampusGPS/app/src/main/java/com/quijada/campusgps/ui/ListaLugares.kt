@@ -94,6 +94,22 @@ fun ListaLugares(
                         )
                     }
 
+                    if (item.dentroDelRadio) {
+                        Surface(
+                            color = if (esSeleccionado) Color(0xFFE8F5E9) else Color(0xFF00E676).copy(alpha = 0.25f),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "En radio",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (esSeleccionado) Color(0xFF1B5E20) else Color(0xFF00E676),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+
                     val textoDistancia = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular"
 
                     if (esSeleccionado) {

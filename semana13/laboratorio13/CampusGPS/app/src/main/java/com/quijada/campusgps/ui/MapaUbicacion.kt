@@ -17,6 +17,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polygon
 
 @Composable
 fun MapaUbicacion(
@@ -24,6 +25,7 @@ fun MapaUbicacion(
     lugares: List<LugarConDistancia> = emptyList(),
     seleccionado: Int? = null,
     masCercanoId: Int? = null,
+    radioMetros: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -61,8 +63,21 @@ fun MapaUbicacion(
         }
     }
 
-    LaunchedEffect(posicionActual, lugares, seleccionado, masCercanoId) {
+    LaunchedEffect(posicionActual, lugares, seleccionado, masCercanoId, radioMetros) {
         mapView.overlays.clear()
+
+        // Dibujar círculo de radio si aplica (antes de los marcadores)
+        if (posicionActual != null && radioMetros != null) {
+            val centerPoint = GeoPoint(posicionActual.latitud, posicionActual.longitud)
+            val circlePoints = Polygon.pointsAsCircle(centerPoint, radioMetros.toDouble())
+            val circlePolygon = Polygon(mapView).apply {
+                points = circlePoints
+                fillPaint.color = Color.argb(45, 25, 118, 210)
+                outlinePaint.color = Color.rgb(25, 118, 210)
+                outlinePaint.strokeWidth = 2f
+            }
+            mapView.overlays.add(circlePolygon)
+        }
 
         val defaultIcon = ContextCompat.getDrawable(context, R.drawable.marker_default)
 

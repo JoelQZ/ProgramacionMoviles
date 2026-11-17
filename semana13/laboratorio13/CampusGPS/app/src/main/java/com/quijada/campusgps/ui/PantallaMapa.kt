@@ -91,6 +91,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
     val categoriaSeleccionada by vm.categoriaSeleccionada.collectAsState()
+    val radioSeleccionado by vm.radioSeleccionado.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -225,6 +226,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     lugares = lugares,
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
+                    radioMetros = radioSeleccionado,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -241,7 +243,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 12.dp, start = 16.dp, end = 16.dp, bottom = 8.dp),
+                        .padding(top = 10.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Barra indicadora centrada arriba
@@ -253,7 +255,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                             .background(Color.White.copy(alpha = 0.4f))
                     )
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     // Fila de botones principales
                     Row(
@@ -303,17 +305,17 @@ fun PantallaMapa(vm: MapaViewModel) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    // Fila horizontal desplazable de FilterChips de Categoría
+                    // Fila horizontal de FilterChips de Categoría
                     val categorias = listOf("Todos", "Estudio", "Comida", "Eventos", "Servicios")
                     val categoriaActual = categoriaSeleccionada ?: "Todos"
 
                     LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 2.dp)
                     ) {
                         items(categorias) { cat ->
                             val esActiva = (cat == categoriaActual)
@@ -323,6 +325,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                                 label = {
                                     Text(
                                         text = cat,
+                                        fontSize = 12.sp,
                                         fontWeight = if (esActiva) FontWeight.Bold else FontWeight.Medium
                                     )
                                 },
@@ -343,7 +346,46 @@ fun PantallaMapa(vm: MapaViewModel) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    // Selector de Radio de Cercanía
+                    val radios = listOf("Sin radio" to null, "100 m" to 100, "200 m" to 200, "500 m" to 500)
+                    val radioActual = radioSeleccionado
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 2.dp)
+                    ) {
+                        items(radios) { (label, radioVal) ->
+                            val esActivo = (radioActual == radioVal)
+                            FilterChip(
+                                selected = esActivo,
+                                onClick = { vm.seleccionarRadio(radioVal) },
+                                label = {
+                                    Text(
+                                        text = label,
+                                        fontSize = 11.sp,
+                                        fontWeight = if (esActivo) FontWeight.Bold else FontWeight.Medium
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = Color.White.copy(alpha = 0.12f),
+                                    labelColor = Color.White,
+                                    selectedContainerColor = Color.White,
+                                    selectedLabelColor = AzulPrincipal
+                                ),
+                                border = FilterChipDefaults.filterChipBorder(
+                                    borderColor = Color.White.copy(alpha = 0.35f),
+                                    selectedBorderColor = Color.White,
+                                    enabled = true,
+                                    selected = esActivo
+                                ),
+                                shape = CircleShape
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     // Estado informativo sobre fondo azul
                     when (val actual = estado) {
@@ -406,7 +448,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
                     // Lista de lugares adaptada sobre el panel azul
                     ListaLugares(
