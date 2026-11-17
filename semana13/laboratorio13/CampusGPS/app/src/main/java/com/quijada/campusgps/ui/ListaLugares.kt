@@ -33,6 +33,7 @@ fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     onClick: (Int) -> Unit,
+    masCercanoId: Int? = null,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
@@ -41,6 +42,9 @@ fun ListaLugares(
             key = { it.lugar.id }
         ) { item ->
             val esSeleccionado = item.lugar.id == seleccionado
+            val esMasCercano = item.lugar.id == masCercanoId
+            val colorIndicador = if (esMasCercano) Color(0xFF2E7D32) else Color(0xFF007AFF)
+
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = if (esSeleccionado) {
@@ -65,7 +69,7 @@ fun ListaLugares(
                         modifier = Modifier
                             .size(12.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFF007AFF))
+                            .background(colorIndicador)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(

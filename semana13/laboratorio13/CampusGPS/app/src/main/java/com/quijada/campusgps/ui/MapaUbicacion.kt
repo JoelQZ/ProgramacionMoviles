@@ -23,6 +23,7 @@ fun MapaUbicacion(
     posicionActual: Posicion?,
     lugares: List<LugarConDistancia> = emptyList(),
     seleccionado: Int? = null,
+    masCercanoId: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val limaLatLng = LatLng(-12.0464, -77.0428)
@@ -76,6 +77,9 @@ fun MapaUbicacion(
 
         lugares.forEach { item ->
             val lugar = item.lugar
+            val isMasCercano = (lugar.id == masCercanoId)
+            val iconHue = if (isMasCercano) BitmapDescriptorFactory.HUE_GREEN else BitmapDescriptorFactory.HUE_AZURE
+
             val markerStateLugar = rememberUpdatedMarkerState(
                 position = LatLng(lugar.latitud, lugar.longitud)
             )
@@ -89,7 +93,7 @@ fun MapaUbicacion(
                     state = markerStateLugar,
                     title = lugar.nombre,
                     snippet = lugar.categoria,
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                    icon = BitmapDescriptorFactory.defaultMarker(iconHue)
                 )
             }
         }

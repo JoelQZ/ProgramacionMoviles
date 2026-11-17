@@ -38,6 +38,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.quijada.campusgps.model.TipoError
 import com.quijada.campusgps.model.UbicacionUi
+import com.quijada.campusgps.util.formatearDistancia
 import com.quijada.campusgps.viewmodel.MapaViewModel
 
 private fun tienePermisoUbicacion(context: Context): Boolean {
@@ -60,6 +61,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
+    val masCercano by vm.masCercano.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -120,6 +122,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 posicionActual = (estado as? UbicacionUi.Lista)?.posicion,
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercanoId = masCercano?.id,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -136,6 +139,24 @@ fun PantallaMapa(vm: MapaViewModel) {
                     enabled = estado !is UbicacionUi.Buscando
                 ) {
                     Text("Obtener mi ubicación")
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                OutlinedButton(
+                    onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                    enabled = masCercano != null
+                ) {
+                    Text("Ir al más cercano")
+                }
+
+                val masCercanoConDistancia = lugares.firstOrNull { it.lugar.id == masCercano?.id }
+                if (masCercano != null && masCercanoConDistancia?.metros != null) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Más cercano: ${masCercano?.nombre} (${formatearDistancia(masCercanoConDistancia.metros)})",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -193,6 +214,7 @@ fun PantallaMapa(vm: MapaViewModel) {
             ListaLugares(
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercanoId = masCercano?.id,
                 onClick = { vm.seleccionar(it) },
                 modifier = Modifier
                     .fillMaxWidth()
