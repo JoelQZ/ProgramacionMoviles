@@ -1,16 +1,28 @@
 package com.quijada.campusgps.ui
 
 import android.graphics.Color
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.quijada.campusgps.model.LugarConDistancia
 import com.quijada.campusgps.model.Posicion
+import com.quijada.campusgps.ui.theme.AzulPrincipal
 import org.osmdroid.config.Configuration
 import org.osmdroid.library.R
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -18,6 +30,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 @Composable
 fun MapaUbicacion(
@@ -26,6 +40,7 @@ fun MapaUbicacion(
     seleccionado: Int? = null,
     masCercanoId: Int? = null,
     radioMetros: Int? = null,
+    permisoConcedido: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -41,9 +56,14 @@ fun MapaUbicacion(
         }
     }
 
+    val locationOverlay = remember(mapView) {
+        MyLocationNewOverlay(GpsMyLocationProvider(context), mapView)
+    }
+
     DisposableEffect(mapView) {
         mapView.onResume()
         onDispose {
+            locationOverlay.disableMyLocation()
             mapView.onPause()
         }
     }
@@ -63,10 +83,18 @@ fun MapaUbicacion(
         }
     }
 
-    LaunchedEffect(posicionActual, lugares, seleccionado, masCercanoId, radioMetros) {
+    LaunchedEffect(posicionActual, lugares, seleccionado, masCercanoId, radioMetros, permisoConcedido) {
         mapView.overlays.clear()
 
-        // Dibujar círculo de radio si aplica (antes de los marcadores)
+        // 1. Punto azul nativo mediante MyLocationNewOverlay si hay permiso
+        if (permisoConcedido) {
+            locationOverlay.enableMyLocation()
+            mapView.overlays.add(locationOverlay)
+        } else {
+            locationOverlay.disableMyLocation()
+        }
+
+        // 2. Círculo de radio si aplica (antes de los marcadores)
         if (posicionActual != null && radioMetros != null) {
             val centerPoint = GeoPoint(posicionActual.latitud, posicionActual.longitud)
             val circlePoints = Polygon.pointsAsCircle(centerPoint, radioMetros.toDouble())
@@ -133,8 +161,32 @@ fun MapaUbicacion(
         mapView.invalidate()
     }
 
-    AndroidView(
-        factory = { mapView },
-        modifier = modifier
-    )
+    Box(modifier = modifier) {
+        AndroidView(
+            factory = { mapView },
+            modifier = Modifier.fillMaxSize()
+        )
+
+        if (permisoConcedido && posicionActual != null) {
+            SmallFloatingActionButton(
+                onClick = {
+                    val point = GeoPoint(posicionActual.latitud, posicionActual.longitud)
+                    mapView.controller.setZoom(17.5)
+                    mapView.controller.animateTo(point)
+                },
+                containerColor = androidx.compose.ui.graphics.Color.White,
+                contentColor = AzulPrincipal,
+                shape = CircleShape,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MyLocation,
+                    contentDescription = "Mi ubicación",
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
 }

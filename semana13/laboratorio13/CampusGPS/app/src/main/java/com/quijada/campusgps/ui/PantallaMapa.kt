@@ -228,6 +228,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
                     radioMetros = radioSeleccionado,
+                    permisoConcedido = tienePermisoUbicacion(context),
                     modifier = Modifier.fillMaxSize()
                 )
             }
