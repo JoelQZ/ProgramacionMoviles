@@ -113,63 +113,75 @@ fun PantallaMapa(vm: MapaViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                onClick = solicitarUbicacion,
-                enabled = estado !is UbicacionUi.Buscando
+            MapaUbicacion(
+                posicionActual = (estado as? UbicacionUi.Lista)?.posicion,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Obtener mi ubicación")
-            }
+                Button(
+                    onClick = solicitarUbicacion,
+                    enabled = estado !is UbicacionUi.Buscando
+                ) {
+                    Text("Obtener mi ubicación")
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            when (val actual = estado) {
-                is UbicacionUi.Inicial -> {
-                    Text("Pulsa el botón para empezar")
-                }
-                is UbicacionUi.Buscando -> {
-                    Text("Buscando ubicación...")
-                }
-                is UbicacionUi.Lista -> {
-                    Text("Latitud: ${actual.posicion.latitud}")
-                    Text("Longitud: ${actual.posicion.longitud}")
-                }
-                is UbicacionUi.Error -> {
-                    if (actual.tipo == TipoError.SIN_PERMISO) {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                when (val actual = estado) {
+                    is UbicacionUi.Inicial -> {
+                        Text("Pulsa el botón para empezar")
+                    }
+                    is UbicacionUi.Buscando -> {
+                        Text("Buscando ubicación...")
+                    }
+                    is UbicacionUi.Lista -> {
+                        Text("Latitud: ${actual.posicion.latitud}")
+                        Text("Longitud: ${actual.posicion.longitud}")
+                    }
+                    is UbicacionUi.Error -> {
+                        if (actual.tipo == TipoError.SIN_PERMISO) {
+                            Card(
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                ),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(
-                                    text = actual.mensaje,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    textAlign = TextAlign.Center
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                OutlinedButton(
-                                    onClick = {
-                                        val intent = Intent(
-                                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                            Uri.fromParts("package", context.packageName, null)
-                                        )
-                                        context.startActivity(intent)
-                                    }
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    Text("Abrir ajustes")
+                                    Text(
+                                        text = actual.mensaje,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Center
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    OutlinedButton(
+                                        onClick = {
+                                            val intent = Intent(
+                                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                                Uri.fromParts("package", context.packageName, null)
+                                            )
+                                            context.startActivity(intent)
+                                        }
+                                    ) {
+                                        Text("Abrir ajustes")
+                                    }
                                 }
                             }
+                        } else {
+                            Text("Error: ${actual.mensaje}")
                         }
-                    } else {
-                        Text("Error: ${actual.mensaje}")
                     }
                 }
             }
