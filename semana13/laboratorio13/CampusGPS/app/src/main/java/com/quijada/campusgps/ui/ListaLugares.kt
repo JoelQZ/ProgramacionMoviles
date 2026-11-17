@@ -40,6 +40,7 @@ fun ListaLugares(
     seleccionado: Int?,
     onClick: (Int) -> Unit,
     masCercanoId: Int? = null,
+    ultimoLugarGuardadoId: Int? = null,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(modifier = modifier) {
@@ -49,6 +50,7 @@ fun ListaLugares(
         ) { item ->
             val esSeleccionado = item.lugar.id == seleccionado
             val esMasCercano = item.lugar.id == masCercanoId
+            val esUltimoGuardado = item.lugar.id == ultimoLugarGuardadoId
 
             val colorIndicador = if (esMasCercano) {
                 if (esSeleccionado) VerdeOscuro else VerdeCercano
@@ -81,12 +83,28 @@ fun ListaLugares(
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text(
-                            text = item.lugar.nombre,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = if (esSeleccionado) AzulOscuro else Color.White
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = item.lugar.nombre,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (esSeleccionado) AzulOscuro else Color.White
+                            )
+                            if (esUltimoGuardado && !esSeleccionado) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Surface(
+                                    color = Color.White.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(4.dp)
+                                ) {
+                                    Text(
+                                        text = "Último visitado",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = Color.White,
+                                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                                    )
+                                }
+                            }
+                        }
                         Text(
                             text = item.lugar.categoria,
                             style = MaterialTheme.typography.bodySmall,

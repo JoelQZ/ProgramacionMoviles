@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quijada.campusgps.data.LugaresRepository
+import com.quijada.campusgps.data.PreferenciasRepository
 import com.quijada.campusgps.data.UbicacionRepository
 import com.quijada.campusgps.model.Lugar
 import com.quijada.campusgps.model.LugarConDistancia
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
 
 class MapaViewModel(
     private val ubicacionRepo: UbicacionRepository,
-    private val lugaresRepo: LugaresRepository
+    private val lugaresRepo: LugaresRepository,
+    private val preferenciasRepo: PreferenciasRepository
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
@@ -60,8 +62,22 @@ class MapaViewModel(
         .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val ultimoLugarGuardadoId: StateFlow<Int?> = preferenciasRepo.ultimoLugarId
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
     init {
         _baseLugares.value = lugaresRepo.obtenerLugares().map { LugarConDistancia(lugar = it, metros = null) }
+
+        viewModelScope.launch {
+            preferenciasRepo.ultimoLugarId.collect { id ->
+                if (id != null && _seleccionado.value == null) {
+                    val existe = _baseLugares.value.any { it.lugar.id == id }
+                    if (existe) {
+                        _seleccionado.value = id
+                    }
+                }
+            }
+        }
     }
 
     fun buscar() {
@@ -105,6 +121,11 @@ class MapaViewModel(
 
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
+        if (id != null) {
+            viewModelScope.launch {
+                preferenciasRepo.guardarUltimoLugar(id)
+            }
+        }
     }
 
     fun seleccionarCategoria(categoria: String?) {

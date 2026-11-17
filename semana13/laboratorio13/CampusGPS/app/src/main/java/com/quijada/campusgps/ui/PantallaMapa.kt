@@ -92,6 +92,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val masCercano by vm.masCercano.collectAsState()
     val categoriaSeleccionada by vm.categoriaSeleccionada.collectAsState()
     val radioSeleccionado by vm.radioSeleccionado.collectAsState()
+    val ultimoLugarGuardadoId by vm.ultimoLugarGuardadoId.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -455,6 +456,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                         lugares = lugares,
                         seleccionado = seleccionado,
                         masCercanoId = masCercano?.id,
+                        ultimoLugarGuardadoId = ultimoLugarGuardadoId,
                         onClick = { vm.seleccionar(it) },
                         modifier = Modifier
                             .fillMaxWidth()

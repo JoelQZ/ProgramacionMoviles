@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.quijada.campusgps.data.LugaresRepositoryLocal
+import com.quijada.campusgps.data.PreferenciasRepositoryDataStore
 import com.quijada.campusgps.data.UbicacionRepositoryGoogle
 import com.quijada.campusgps.ui.PantallaMapa
 import com.quijada.campusgps.ui.theme.CampusGPSTheme
@@ -17,7 +18,8 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MapaViewModel by viewModels {
         CampusViewModelFactory(
             ubicacionRepo = UbicacionRepositoryGoogle(applicationContext),
-            lugaresRepo = LugaresRepositoryLocal()
+            lugaresRepo = LugaresRepositoryLocal(),
+            preferenciasRepo = PreferenciasRepositoryDataStore(applicationContext)
         )
     }
 
