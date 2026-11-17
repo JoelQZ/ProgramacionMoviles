@@ -15,13 +15,13 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import com.quijada.campusgps.model.Lugar
+import com.quijada.campusgps.model.LugarConDistancia
 import com.quijada.campusgps.model.Posicion
 
 @Composable
 fun MapaUbicacion(
     posicionActual: Posicion?,
-    lugares: List<Lugar> = emptyList(),
+    lugares: List<LugarConDistancia> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     val limaLatLng = LatLng(-12.0464, -77.0428)
@@ -61,7 +61,8 @@ fun MapaUbicacion(
             )
         }
 
-        lugares.forEach { lugar ->
+        lugares.forEach { item ->
+            val lugar = item.lugar
             key(lugar.id) {
                 Marker(
                     state = rememberUpdatedMarkerState(
