@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -30,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -173,40 +170,17 @@ fun PantallaMapa(vm: MapaViewModel) {
                         Text("Longitud: ${actual.posicion.longitud}")
                     }
                     is UbicacionUi.Error -> {
-                        if (actual.tipo == TipoError.SIN_PERMISO) {
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                                ),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = actual.mensaje,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        textAlign = TextAlign.Center
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    OutlinedButton(
-                                        onClick = {
-                                            val intent = Intent(
-                                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                                                Uri.fromParts("package", context.packageName, null)
-                                            )
-                                            context.startActivity(intent)
-                                        }
-                                    ) {
-                                        Text("Abrir ajustes")
-                                    }
-                                }
+                        MensajeError(
+                            error = actual,
+                            onReintentar = solicitarUbicacion,
+                            onAbrirAjustes = {
+                                val intent = Intent(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", context.packageName, null)
+                                )
+                                context.startActivity(intent)
                             }
-                        } else {
-                            Text("Error: ${actual.mensaje}")
-                        }
+                        )
                     }
                 }
             }

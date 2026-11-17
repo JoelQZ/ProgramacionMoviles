@@ -45,12 +45,24 @@ class MapaViewModel(
     fun buscar() {
         viewModelScope.launch {
             _estado.value = UbicacionUi.Buscando
+
+            if (!ubicacionRepo.playServicesDisponible()) {
+                _estado.value = UbicacionUi.Error(
+                    mensaje = "Este dispositivo no tiene Google Play Services",
+                    tipo = TipoError.SIN_PLAY_SERVICES
+                )
+                return@launch
+            }
+
             val pos = ubicacionRepo.obtenerUbicacionActual()
             if (pos != null) {
                 actualizarDistancias(pos)
                 _estado.value = UbicacionUi.Lista(pos)
             } else {
-                _estado.value = UbicacionUi.Error("No se pudo obtener la ubicación")
+                _estado.value = UbicacionUi.Error(
+                    mensaje = "No se pudo obtener la ubicación. Activa el GPS e intenta de nuevo",
+                    tipo = TipoError.GPS_APAGADO
+                )
             }
         }
     }
