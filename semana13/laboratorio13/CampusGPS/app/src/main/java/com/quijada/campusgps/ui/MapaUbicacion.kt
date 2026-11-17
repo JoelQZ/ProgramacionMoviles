@@ -30,6 +30,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -41,6 +42,7 @@ fun MapaUbicacion(
     masCercanoId: Int? = null,
     radioMetros: Int? = null,
     permisoConcedido: Boolean = false,
+    modoOscuro: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -66,6 +68,15 @@ fun MapaUbicacion(
             locationOverlay.disableMyLocation()
             mapView.onPause()
         }
+    }
+
+    LaunchedEffect(modoOscuro) {
+        if (modoOscuro) {
+            mapView.overlayManager.tilesOverlay.setColorFilter(TilesOverlay.INVERT_COLORS)
+        } else {
+            mapView.overlayManager.tilesOverlay.setColorFilter(null)
+        }
+        mapView.invalidate()
     }
 
     LaunchedEffect(seleccionado, posicionActual) {
