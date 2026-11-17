@@ -13,6 +13,7 @@ import com.quijada.campusgps.model.TipoError
 import com.quijada.campusgps.model.UbicacionUi
 import com.quijada.campusgps.util.distanciaMetros
 import com.quijada.campusgps.util.formatearDistancia
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +39,11 @@ class MapaViewModel(
 
     private val _radioSeleccionado = MutableStateFlow<Int?>(null)
     val radioSeleccionado: StateFlow<Int?> = _radioSeleccionado.asStateFlow()
+
+    private val _seguimientoActivo = MutableStateFlow<Boolean>(false)
+    val seguimientoActivo: StateFlow<Boolean> = _seguimientoActivo.asStateFlow()
+
+    private var seguimientoJob: Job? = null
 
     val lugares: StateFlow<List<LugarConDistancia>> = combine(
         _baseLugares,
@@ -105,6 +111,39 @@ class MapaViewModel(
         }
     }
 
+    fun alternarSeguimientoEnVivo() {
+        if (!_seguimientoActivo.value) {
+            if (!ubicacionRepo.playServicesDisponible()) {
+                _estado.value = UbicacionUi.Error(
+                    mensaje = "Este dispositivo no tiene Google Play Services",
+                    tipo = TipoError.SIN_PLAY_SERVICES
+                )
+                return
+            }
+
+            _seguimientoActivo.value = true
+            seguimientoJob?.cancel()
+            seguimientoJob = viewModelScope.launch {
+                _estado.value = UbicacionUi.Buscando
+                ubicacionRepo.observarUbicacionEnVivo().collect { result ->
+                    result.onSuccess { pos ->
+                        actualizarDistancias(pos)
+                        _estado.value = UbicacionUi.Lista(pos)
+                    }.onFailure {
+                        _estado.value = UbicacionUi.Error(
+                            mensaje = "No se pudo obtener la ubicación en vivo. Activa el GPS e intenta de nuevo",
+                            tipo = TipoError.GPS_APAGADO
+                        )
+                    }
+                }
+            }
+        } else {
+            seguimientoJob?.cancel()
+            seguimientoJob = null
+            _seguimientoActivo.value = false
+        }
+    }
+
     private fun actualizarDistancias(pos: Posicion) {
         val listaConDistancias = _baseLugares.value.map { item ->
             val d = distanciaMetros(pos, item.lugar)
@@ -141,5 +180,11 @@ class MapaViewModel(
             mensaje = "Sin permiso de ubicación no puedo mostrar dónde estás",
             tipo = TipoError.SIN_PERMISO
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        seguimientoJob?.cancel()
+        seguimientoJob = null
     }
 }

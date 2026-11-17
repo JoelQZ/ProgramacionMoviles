@@ -27,9 +27,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.NearMe
+import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -93,6 +95,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val categoriaSeleccionada by vm.categoriaSeleccionada.collectAsState()
     val radioSeleccionado by vm.radioSeleccionado.collectAsState()
     val ultimoLugarGuardadoId by vm.ultimoLugarGuardadoId.collectAsState()
+    val seguimientoActivo by vm.seguimientoActivo.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -110,6 +113,19 @@ fun PantallaMapa(vm: MapaViewModel) {
     val solicitarUbicacion = {
         if (tienePermisoUbicacion(context)) {
             vm.buscar()
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    val solicitarSeguimiento = {
+        if (tienePermisoUbicacion(context)) {
+            vm.alternarSeguimientoEnVivo()
         } else {
             permissionLauncher.launch(
                 arrayOf(
@@ -245,7 +261,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 10.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
+                        .padding(top = 10.dp, start = 12.dp, end = 12.dp, bottom = 6.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Barra indicadora centrada arriba
@@ -262,7 +278,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     // Fila de botones principales
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Button(
@@ -279,10 +295,10 @@ fun PantallaMapa(vm: MapaViewModel) {
                             Icon(
                                 imageVector = Icons.Default.MyLocation,
                                 contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Obtener mi ubicación", fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Ubicación", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
 
                         OutlinedButton(
@@ -300,10 +316,31 @@ fun PantallaMapa(vm: MapaViewModel) {
                             Icon(
                                 imageVector = Icons.Default.NearMe,
                                 contentDescription = null,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Ir al más cercano", fontWeight = FontWeight.SemiBold)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Más cercano", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                        }
+
+                        Button(
+                            onClick = solicitarSeguimiento,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (seguimientoActivo) Color(0xFF00E676) else Color.White.copy(alpha = 0.18f),
+                                contentColor = if (seguimientoActivo) Color(0xFF1B5E20) else Color.White
+                            ),
+                            shape = CircleShape
+                        ) {
+                            Icon(
+                                imageVector = if (seguimientoActivo) Icons.Default.GpsFixed else Icons.Default.Sensors,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (seguimientoActivo) "En vivo (ON)" else "En vivo",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
                         }
                     }
 
@@ -327,7 +364,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                                 label = {
                                     Text(
                                         text = cat,
-                                        fontSize = 12.sp,
+                                        fontSize = 11.sp,
                                         fontWeight = if (esActiva) FontWeight.Bold else FontWeight.Medium
                                     )
                                 },
