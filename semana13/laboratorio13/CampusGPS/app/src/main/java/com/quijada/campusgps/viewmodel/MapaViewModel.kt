@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quijada.campusgps.data.LugaresRepository
 import com.quijada.campusgps.data.UbicacionRepository
+import com.quijada.campusgps.model.TipoError
 import com.quijada.campusgps.model.UbicacionUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,5 +29,12 @@ class MapaViewModel(
                 _estado.value = UbicacionUi.Error("No se pudo obtener la ubicación")
             }
         }
+    }
+
+    fun permisoDenegado() {
+        _estado.value = UbicacionUi.Error(
+            mensaje = "Sin permiso de ubicación no puedo mostrar dónde estás",
+            tipo = TipoError.SIN_PERMISO
+        )
     }
 }
