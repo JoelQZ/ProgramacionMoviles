@@ -1,0 +1,33 @@
+package com.quijada.campusgps
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import com.quijada.campusgps.data.LugaresRepositoryLocal
+import com.quijada.campusgps.data.UbicacionRepositoryGoogle
+import com.quijada.campusgps.ui.PantallaMapa
+import com.quijada.campusgps.ui.theme.CampusGPSTheme
+import com.quijada.campusgps.viewmodel.CampusViewModelFactory
+import com.quijada.campusgps.viewmodel.MapaViewModel
+
+class MainActivity : ComponentActivity() {
+
+    private val viewModel: MapaViewModel by viewModels {
+        CampusViewModelFactory(
+            ubicacionRepo = UbicacionRepositoryGoogle(applicationContext),
+            lugaresRepo = LugaresRepositoryLocal()
+        )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            CampusGPSTheme {
+                PantallaMapa(vm = viewModel)
+            }
+        }
+    }
+}
