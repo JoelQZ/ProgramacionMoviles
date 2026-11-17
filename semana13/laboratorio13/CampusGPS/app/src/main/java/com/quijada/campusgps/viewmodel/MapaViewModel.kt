@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,8 +29,18 @@ class MapaViewModel(
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
     val estado: StateFlow<UbicacionUi> = _estado.asStateFlow()
 
-    private val _lugares = MutableStateFlow<List<LugarConDistancia>>(emptyList())
-    val lugares: StateFlow<List<LugarConDistancia>> = _lugares.asStateFlow()
+    private val _baseLugares = MutableStateFlow<List<LugarConDistancia>>(emptyList())
+
+    private val _categoriaSeleccionada = MutableStateFlow<String?>(null)
+    val categoriaSeleccionada: StateFlow<String?> = _categoriaSeleccionada.asStateFlow()
+
+    val lugares: StateFlow<List<LugarConDistancia>> = combine(_baseLugares, _categoriaSeleccionada) { lista, cat ->
+        if (cat.isNullOrEmpty() || cat == "Todos") {
+            lista
+        } else {
+            lista.filter { it.lugar.categoria.equals(cat, ignoreCase = true) }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
@@ -39,7 +50,7 @@ class MapaViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     init {
-        _lugares.value = lugaresRepo.obtenerLugares().map { LugarConDistancia(lugar = it, metros = null) }
+        _baseLugares.value = lugaresRepo.obtenerLugares().map { LugarConDistancia(lugar = it, metros = null) }
     }
 
     fun buscar() {
@@ -68,12 +79,12 @@ class MapaViewModel(
     }
 
     private fun actualizarDistancias(pos: Posicion) {
-        val listaConDistancias = _lugares.value.map { item ->
+        val listaConDistancias = _baseLugares.value.map { item ->
             val d = distanciaMetros(pos, item.lugar)
             LugarConDistancia(lugar = item.lugar, metros = d)
         }.sortedBy { it.metros }
 
-        _lugares.value = listaConDistancias
+        _baseLugares.value = listaConDistancias
 
         listaConDistancias.forEach { item ->
             val dStr = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular"
@@ -83,6 +94,10 @@ class MapaViewModel(
 
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
+    }
+
+    fun seleccionarCategoria(categoria: String?) {
+        _categoriaSeleccionada.value = if (categoria == "Todos") null else categoria
     }
 
     fun permisoDenegado() {

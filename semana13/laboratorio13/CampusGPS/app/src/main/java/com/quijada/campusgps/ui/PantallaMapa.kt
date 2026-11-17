@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,6 +34,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -86,6 +90,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
+    val categoriaSeleccionada by vm.categoriaSeleccionada.collectAsState()
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -248,7 +253,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                             .background(Color.White.copy(alpha = 0.4f))
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     // Fila de botones principales
                     Row(
@@ -298,7 +303,47 @@ fun PantallaMapa(vm: MapaViewModel) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Fila horizontal desplazable de FilterChips de Categoría
+                    val categorias = listOf("Todos", "Estudio", "Comida", "Eventos", "Servicios")
+                    val categoriaActual = categoriaSeleccionada ?: "Todos"
+
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        items(categorias) { cat ->
+                            val esActiva = (cat == categoriaActual)
+                            FilterChip(
+                                selected = esActiva,
+                                onClick = { vm.seleccionarCategoria(cat) },
+                                label = {
+                                    Text(
+                                        text = cat,
+                                        fontWeight = if (esActiva) FontWeight.Bold else FontWeight.Medium
+                                    )
+                                },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    containerColor = Color.White.copy(alpha = 0.15f),
+                                    labelColor = Color.White,
+                                    selectedContainerColor = Color.White,
+                                    selectedLabelColor = AzulPrincipal
+                                ),
+                                border = FilterChipDefaults.filterChipBorder(
+                                    borderColor = Color.White.copy(alpha = 0.4f),
+                                    selectedBorderColor = Color.White,
+                                    enabled = true,
+                                    selected = esActiva
+                                ),
+                                shape = CircleShape
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // Estado informativo sobre fondo azul
                     when (val actual = estado) {
@@ -341,7 +386,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White,
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                     )
                                 }
                             }
@@ -361,7 +406,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // Lista de lugares adaptada sobre el panel azul
                     ListaLugares(
