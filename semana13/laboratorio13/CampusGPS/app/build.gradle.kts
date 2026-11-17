@@ -49,9 +49,12 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
     implementation("com.google.maps.android:maps-compose:8.4.0")
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
     implementation(platform(libs.androidx.compose.bom))
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)

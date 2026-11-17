@@ -1,22 +1,22 @@
 package com.quijada.campusgps.ui
 
-import androidx.compose.foundation.layout.fillMaxSize
+import android.graphics.Color
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberUpdatedMarkerState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import com.quijada.campusgps.model.LugarConDistancia
 import com.quijada.campusgps.model.Posicion
+import org.osmdroid.config.Configuration
+import org.osmdroid.library.R
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun MapaUbicacion(
@@ -26,76 +26,100 @@ fun MapaUbicacion(
     masCercanoId: Int? = null,
     modifier: Modifier = Modifier
 ) {
-    val limaLatLng = LatLng(-12.0464, -77.0428)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(limaLatLng, 12f)
-    }
+    val context = LocalContext.current
 
-    val targetLatLng = remember(posicionActual) {
-        posicionActual?.let { LatLng(it.latitud, it.longitud) }
-    }
+    Configuration.getInstance().userAgentValue = context.packageName
 
-    val markerState = remember(targetLatLng) {
-        targetLatLng?.let { MarkerState(position = it) }
-    }
-
-    LaunchedEffect(targetLatLng) {
-        if (targetLatLng != null) {
-            markerState?.position = targetLatLng
-            cameraPositionState.animate(
-                update = CameraUpdateFactory.newLatLngZoom(targetLatLng, 16f)
-            )
-            markerState?.showInfoWindow()
+    val mapView = remember {
+        MapView(context).apply {
+            setTileSource(TileSourceFactory.MAPNIK)
+            setMultiTouchControls(true)
+            controller.setZoom(13.0)
+            controller.setCenter(GeoPoint(-12.0464, -77.0428))
         }
     }
 
-    LaunchedEffect(seleccionado) {
+    DisposableEffect(mapView) {
+        mapView.onResume()
+        onDispose {
+            mapView.onPause()
+        }
+    }
+
+    LaunchedEffect(seleccionado, posicionActual) {
         if (seleccionado != null) {
             val lugarSeleccionado = lugares.find { it.lugar.id == seleccionado }?.lugar
             if (lugarSeleccionado != null) {
-                val target = LatLng(lugarSeleccionado.latitud, lugarSeleccionado.longitud)
-                cameraPositionState.animate(
-                    update = CameraUpdateFactory.newLatLngZoom(target, 17f)
-                )
+                val point = GeoPoint(lugarSeleccionado.latitud, lugarSeleccionado.longitud)
+                mapView.controller.setZoom(17.5)
+                mapView.controller.animateTo(point)
             }
+        } else if (posicionActual != null) {
+            val point = GeoPoint(posicionActual.latitud, posicionActual.longitud)
+            mapView.controller.setZoom(17.5)
+            mapView.controller.animateTo(point)
         }
     }
 
-    GoogleMap(
-        modifier = modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        onMapLoaded = {
-            markerState?.showInfoWindow()
-        }
-    ) {
-        if (targetLatLng != null && markerState != null) {
-            Marker(
-                state = markerState,
+    LaunchedEffect(posicionActual, lugares, seleccionado, masCercanoId) {
+        mapView.overlays.clear()
+
+        val defaultIcon = ContextCompat.getDrawable(context, R.drawable.marker_default)
+
+        var userMarkerToOpen: Marker? = null
+        if (posicionActual != null) {
+            val userPoint = GeoPoint(posicionActual.latitud, posicionActual.longitud)
+            val userMarker = Marker(mapView).apply {
+                position = userPoint
                 title = "Estás aquí"
-            )
-        }
-
-        lugares.forEach { item ->
-            val lugar = item.lugar
-            val isMasCercano = (lugar.id == masCercanoId)
-            val iconHue = if (isMasCercano) BitmapDescriptorFactory.HUE_GREEN else BitmapDescriptorFactory.HUE_AZURE
-
-            val markerStateLugar = rememberUpdatedMarkerState(
-                position = LatLng(lugar.latitud, lugar.longitud)
-            )
-            LaunchedEffect(seleccionado) {
-                if (lugar.id == seleccionado) {
-                    markerStateLugar.showInfoWindow()
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                defaultIcon?.constantState?.newDrawable()?.mutate()?.let { iconDrawable ->
+                    iconDrawable.setTint(Color.RED)
+                    icon = iconDrawable
                 }
             }
-            key(lugar.id) {
-                Marker(
-                    state = markerStateLugar,
-                    title = lugar.nombre,
-                    snippet = lugar.categoria,
-                    icon = BitmapDescriptorFactory.defaultMarker(iconHue)
-                )
+            mapView.overlays.add(userMarker)
+            userMarkerToOpen = userMarker
+        }
+
+        var selectedMarkerToOpen: Marker? = null
+        lugares.forEach { item ->
+            val lugar = item.lugar
+            val lugarPoint = GeoPoint(lugar.latitud, lugar.longitud)
+            val isMasCercano = (lugar.id == masCercanoId)
+            val isSeleccionado = (lugar.id == seleccionado)
+
+            val markerColor = if (isMasCercano) Color.parseColor("#00E676") else Color.parseColor("#1976D2")
+
+            val marker = Marker(mapView).apply {
+                position = lugarPoint
+                title = lugar.nombre
+                snippet = lugar.categoria
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                defaultIcon?.constantState?.newDrawable()?.mutate()?.let { iconDrawable ->
+                    iconDrawable.setTint(markerColor)
+                    icon = iconDrawable
+                }
+            }
+
+            mapView.overlays.add(marker)
+
+            if (isSeleccionado) {
+                selectedMarkerToOpen = marker
             }
         }
+
+        if (selectedMarkerToOpen != null) {
+            selectedMarkerToOpen.showInfoWindow()
+        } else {
+            userMarkerToOpen?.showInfoWindow()
+        }
+
+        mapView.invalidate()
     }
+
+    AndroidView(
+        factory = { mapView },
+        modifier = modifier
+    )
 }
