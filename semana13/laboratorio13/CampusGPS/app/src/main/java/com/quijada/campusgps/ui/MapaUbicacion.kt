@@ -22,6 +22,7 @@ import com.quijada.campusgps.model.Posicion
 fun MapaUbicacion(
     posicionActual: Posicion?,
     lugares: List<LugarConDistancia> = emptyList(),
+    seleccionado: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val limaLatLng = LatLng(-12.0464, -77.0428)
@@ -47,6 +48,18 @@ fun MapaUbicacion(
         }
     }
 
+    LaunchedEffect(seleccionado) {
+        if (seleccionado != null) {
+            val lugarSeleccionado = lugares.find { it.lugar.id == seleccionado }?.lugar
+            if (lugarSeleccionado != null) {
+                val target = LatLng(lugarSeleccionado.latitud, lugarSeleccionado.longitud)
+                cameraPositionState.animate(
+                    update = CameraUpdateFactory.newLatLngZoom(target, 17f)
+                )
+            }
+        }
+    }
+
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
@@ -63,11 +76,17 @@ fun MapaUbicacion(
 
         lugares.forEach { item ->
             val lugar = item.lugar
+            val markerStateLugar = rememberUpdatedMarkerState(
+                position = LatLng(lugar.latitud, lugar.longitud)
+            )
+            LaunchedEffect(seleccionado) {
+                if (lugar.id == seleccionado) {
+                    markerStateLugar.showInfoWindow()
+                }
+            }
             key(lugar.id) {
                 Marker(
-                    state = rememberUpdatedMarkerState(
-                        position = LatLng(lugar.latitud, lugar.longitud)
-                    ),
+                    state = markerStateLugar,
                     title = lugar.nombre,
                     snippet = lugar.categoria,
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)

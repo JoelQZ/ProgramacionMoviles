@@ -27,6 +27,9 @@ class MapaViewModel(
     private val _lugares = MutableStateFlow<List<LugarConDistancia>>(emptyList())
     val lugares: StateFlow<List<LugarConDistancia>> = _lugares.asStateFlow()
 
+    private val _seleccionado = MutableStateFlow<Int?>(null)
+    val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+
     init {
         _lugares.value = lugaresRepo.obtenerLugares().map { LugarConDistancia(lugar = it, metros = null) }
     }
@@ -56,6 +59,10 @@ class MapaViewModel(
             val dStr = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular"
             Log.d("CampusGPS_Distancia", "${item.lugar.nombre}: $dStr")
         }
+    }
+
+    fun seleccionar(id: Int?) {
+        _seleccionado.value = id
     }
 
     fun permisoDenegado() {
