@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import com.quijada.campusgps.model.LugarConDistancia
 import com.quijada.campusgps.model.Posicion
@@ -178,19 +179,26 @@ fun MapaUbicacion(
             modifier = Modifier.fillMaxSize()
         )
 
-        if (permisoConcedido && posicionActual != null) {
+        if (permisoConcedido || posicionActual != null) {
             SmallFloatingActionButton(
                 onClick = {
-                    val point = GeoPoint(posicionActual.latitud, posicionActual.longitud)
-                    mapView.controller.setZoom(17.5)
-                    mapView.controller.animateTo(point)
+                    val myLoc = locationOverlay.myLocation
+                    if (myLoc != null) {
+                        mapView.controller.setZoom(17.5)
+                        mapView.controller.animateTo(myLoc)
+                    } else if (posicionActual != null) {
+                        val point = GeoPoint(posicionActual.latitud, posicionActual.longitud)
+                        mapView.controller.setZoom(17.5)
+                        mapView.controller.animateTo(point)
+                    }
                 },
-                containerColor = androidx.compose.ui.graphics.Color.White,
-                contentColor = AzulPrincipal,
+                containerColor = if (modoOscuro) androidx.compose.ui.graphics.Color(0xFF1E293B) else androidx.compose.ui.graphics.Color.White,
+                contentColor = if (modoOscuro) androidx.compose.ui.graphics.Color(0xFF38BDF8) else AzulPrincipal,
                 shape = CircleShape,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(12.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(top = 290.dp, end = 16.dp)
+                    .zIndex(10f)
             ) {
                 Icon(
                     imageVector = Icons.Default.MyLocation,

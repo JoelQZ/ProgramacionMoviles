@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,9 +43,13 @@ fun ListaLugares(
     onClick: (Int) -> Unit,
     masCercanoId: Int? = null,
     ultimoLugarGuardadoId: Int? = null,
+    modoOscuro: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(bottom = 24.dp)
+    ) {
         items(
             items = lugares,
             key = { it.lugar.id }
@@ -52,18 +58,44 @@ fun ListaLugares(
             val esMasCercano = item.lugar.id == masCercanoId
             val esUltimoGuardado = item.lugar.id == ultimoLugarGuardadoId
 
-            val colorIndicador = if (esMasCercano) {
-                if (esSeleccionado) VerdeOscuro else VerdeCercano
+            val colorIndicador = if (modoOscuro) {
+                if (esMasCercano) Color(0xFF10B981) else (if (esSeleccionado) Color(0xFF0F172A) else Color(0xFF94A3B8))
             } else {
-                if (esSeleccionado) AzulOscuro else Color.White.copy(alpha = 0.8f)
+                if (esMasCercano) {
+                    if (esSeleccionado) VerdeOscuro else VerdeCercano
+                } else {
+                    if (esSeleccionado) AzulOscuro else Color.White.copy(alpha = 0.8f)
+                }
+            }
+
+            val cardContainerColor = if (modoOscuro) {
+                if (esSeleccionado) Color(0xFF38BDF8) else Color(0xFF1E293B)
+            } else {
+                if (esSeleccionado) Color.White else Color.White.copy(alpha = 0.14f)
+            }
+
+            val cardBorder = if (modoOscuro) {
+                if (esSeleccionado) BorderStroke(2.dp, Color(0xFF7DD3FC)) else BorderStroke(1.dp, Color(0xFF334155))
+            } else {
+                if (esSeleccionado) BorderStroke(2.dp, AzulClaro) else null
+            }
+
+            val titleColor = if (modoOscuro) {
+                if (esSeleccionado) Color(0xFF0F172A) else Color(0xFFF8FAFC)
+            } else {
+                if (esSeleccionado) AzulOscuro else Color.White
+            }
+
+            val categoryColor = if (modoOscuro) {
+                if (esSeleccionado) Color(0xFF0F172A).copy(alpha = 0.75f) else Color(0xFF94A3B8)
+            } else {
+                if (esSeleccionado) Color.Gray else Color.White.copy(alpha = 0.75f)
             }
 
             Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = if (esSeleccionado) Color.White else Color.White.copy(alpha = 0.14f)
-                ),
+                colors = CardDefaults.cardColors(containerColor = cardContainerColor),
                 shape = RoundedCornerShape(16.dp),
-                border = if (esSeleccionado) BorderStroke(2.dp, AzulClaro) else null,
+                border = cardBorder,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
@@ -88,18 +120,18 @@ fun ListaLugares(
                                 text = item.lugar.nombre,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (esSeleccionado) AzulOscuro else Color.White
+                                color = titleColor
                             )
                             if (esUltimoGuardado && !esSeleccionado) {
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(
-                                    color = Color.White.copy(alpha = 0.2f),
+                                    color = if (modoOscuro) Color(0xFF334155) else Color.White.copy(alpha = 0.2f),
                                     shape = RoundedCornerShape(4.dp)
                                 ) {
                                     Text(
                                         text = "Último visitado",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = Color.White,
+                                        color = if (modoOscuro) Color(0xFFF8FAFC) else Color.White,
                                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                                     )
                                 }
@@ -108,20 +140,28 @@ fun ListaLugares(
                         Text(
                             text = item.lugar.categoria,
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (esSeleccionado) Color.Gray else Color.White.copy(alpha = 0.75f)
+                            color = categoryColor
                         )
                     }
 
                     if (item.dentroDelRadio) {
                         Surface(
-                            color = if (esSeleccionado) Color(0xFFE8F5E9) else Color(0xFF00E676).copy(alpha = 0.25f),
+                            color = if (modoOscuro) {
+                                if (esSeleccionado) Color(0xFF0F172A).copy(alpha = 0.15f) else Color(0xFF10B981).copy(alpha = 0.2f)
+                            } else {
+                                if (esSeleccionado) Color(0xFFE8F5E9) else Color(0xFF00E676).copy(alpha = 0.25f)
+                            },
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
                                 text = "En radio",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = if (esSeleccionado) Color(0xFF1B5E20) else Color(0xFF00E676),
+                                color = if (modoOscuro) {
+                                    if (esSeleccionado) Color(0xFF065F46) else Color(0xFF34D399)
+                                } else {
+                                    if (esSeleccionado) Color(0xFF1B5E20) else Color(0xFF00E676)
+                                },
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
                         }
@@ -132,14 +172,14 @@ fun ListaLugares(
 
                     if (esSeleccionado) {
                         Surface(
-                            color = AzulClaro,
+                            color = if (modoOscuro) Color(0xFF0F172A) else AzulClaro,
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
                                 text = textoDistancia,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = AzulOscuro,
+                                color = if (modoOscuro) Color(0xFF38BDF8) else AzulOscuro,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             )
                         }
@@ -148,7 +188,11 @@ fun ListaLugares(
                             text = textoDistancia,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = if (esMasCercano) FontWeight.Bold else FontWeight.SemiBold,
-                            color = if (esMasCercano) VerdeCercano else Color.White.copy(alpha = 0.9f)
+                            color = if (modoOscuro) {
+                                if (esMasCercano) Color(0xFF34D399) else Color(0xFF38BDF8)
+                            } else {
+                                if (esMasCercano) VerdeCercano else Color.White.copy(alpha = 0.9f)
+                            }
                         )
                     }
                 }
