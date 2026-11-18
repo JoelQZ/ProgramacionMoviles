@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +40,7 @@ fun PantallaTareas(
     modifier: Modifier = Modifier
 ) {
     val mensaje by viewModel.mensaje.collectAsState()
+    val progreso by viewModel.progreso.collectAsState()
 
     Scaffold(
         topBar = {
@@ -67,6 +69,7 @@ fun PantallaTareas(
         ) {
             TarjetaTareaConProgreso(
                 mensaje = mensaje,
+                progreso = progreso,
                 onTareaLarga = { viewModel.tareaLarga() }
             )
             TarjetaContarPrimos()
@@ -78,6 +81,7 @@ fun PantallaTareas(
 @Composable
 fun TarjetaTareaConProgreso(
     mensaje: String,
+    progreso: Float,
     onTareaLarga: () -> Unit
 ) {
     var contador by remember { mutableIntStateOf(0) }
@@ -105,9 +109,19 @@ fun TarjetaTareaConProgreso(
                     Text(text = "Tócame: $contador")
                 }
                 Button(onClick = onTareaLarga) {
-                    Text(text = "Tarea larga")
+                    Text(text = "Iniciar")
                 }
             }
+
+            LinearProgressIndicator(
+                progress = { progreso },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "${(progreso * 100).toInt()} %",
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             Text(
                 text = mensaje,
