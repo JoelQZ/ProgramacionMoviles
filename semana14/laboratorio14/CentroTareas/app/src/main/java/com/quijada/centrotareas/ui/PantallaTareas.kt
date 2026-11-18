@@ -67,7 +67,7 @@ fun PantallaTareas(
         ) {
             TarjetaTareaConProgreso(
                 mensaje = mensaje,
-                onTareaLargaMala = { viewModel.tareaLargaMala() }
+                onTareaLarga = { viewModel.tareaLarga() }
             )
             TarjetaContarPrimos()
             TarjetaDosCargas()
@@ -78,7 +78,7 @@ fun PantallaTareas(
 @Composable
 fun TarjetaTareaConProgreso(
     mensaje: String,
-    onTareaLargaMala: () -> Unit
+    onTareaLarga: () -> Unit
 ) {
     var contador by remember { mutableIntStateOf(0) }
 
@@ -104,8 +104,8 @@ fun TarjetaTareaConProgreso(
                 Button(onClick = { contador++ }) {
                     Text(text = "Tócame: $contador")
                 }
-                Button(onClick = onTareaLargaMala) {
-                    Text(text = "Tarea larga (MAL)")
+                Button(onClick = onTareaLarga) {
+                    Text(text = "Tarea larga")
                 }
             }
 
