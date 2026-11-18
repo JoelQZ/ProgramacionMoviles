@@ -3,7 +3,11 @@ package com.quijada.centrotareas.model
 sealed interface PrimosUi {
     data object Inactivo : PrimosUi
     data object Calculando : PrimosUi
-    data class Listo(val cantidad: Int, val duracionMs: Long) : PrimosUi
+    data class Listo(
+        val hasta: Int,
+        val cantidad: Int,
+        val duracionMs: Long
+    ) : PrimosUi
     data object Cancelado : PrimosUi
 }
 

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quijada.centrotareas.data.TareasRepository
+import com.quijada.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.system.measureTimeMillis
 
 class TareasViewModel(
     private val repository: TareasRepository
@@ -27,7 +29,11 @@ class TareasViewModel(
     private val _corriendo = MutableStateFlow(false)
     val corriendo: StateFlow<Boolean> = _corriendo.asStateFlow()
 
+    private val _primos = MutableStateFlow<PrimosUi>(PrimosUi.Inactivo)
+    val primos: StateFlow<PrimosUi> = _primos.asStateFlow()
+
     private var jobTarea: Job? = null
+    private var jobPrimos: Job? = null
 
     fun tareaLarga() {
         jobTarea?.cancel()
@@ -58,5 +64,31 @@ class TareasViewModel(
 
     fun cancelarTarea() {
         jobTarea?.cancel()
+    }
+
+    fun calcularPrimos(hasta: Int) {
+        if (hasta < 2) return
+        jobPrimos?.cancel()
+        jobPrimos = viewModelScope.launch {
+            _primos.value = PrimosUi.Calculando
+            try {
+                var cantidad = 0
+                val duracionMs = measureTimeMillis {
+                    cantidad = repository.contarPrimos(hasta)
+                }
+                _primos.value = PrimosUi.Listo(
+                    hasta = hasta,
+                    cantidad = cantidad,
+                    duracionMs = duracionMs
+                )
+            } catch (e: CancellationException) {
+                _primos.value = PrimosUi.Cancelado
+                throw e
+            }
+        }
+    }
+
+    fun cancelarPrimos() {
+        jobPrimos?.cancel()
     }
 }
