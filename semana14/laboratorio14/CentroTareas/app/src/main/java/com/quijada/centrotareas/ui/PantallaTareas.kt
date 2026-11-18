@@ -2,6 +2,7 @@ package com.quijada.centrotareas.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +20,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +38,8 @@ fun PantallaTareas(
     viewModel: TareasViewModel,
     modifier: Modifier = Modifier
 ) {
+    val mensaje by viewModel.mensaje.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -55,7 +65,10 @@ fun PantallaTareas(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TarjetaTareaConProgreso()
+            TarjetaTareaConProgreso(
+                mensaje = mensaje,
+                onTareaLargaMala = { viewModel.tareaLargaMala() }
+            )
             TarjetaContarPrimos()
             TarjetaDosCargas()
         }
@@ -63,13 +76,19 @@ fun PantallaTareas(
 }
 
 @Composable
-fun TarjetaTareaConProgreso() {
+fun TarjetaTareaConProgreso(
+    mensaje: String,
+    onTareaLargaMala: () -> Unit
+) {
+    var contador by remember { mutableIntStateOf(0) }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "Tarea con progreso",
@@ -77,10 +96,22 @@ fun TarjetaTareaConProgreso() {
                 color = Color.Blue,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(onClick = { contador++ }) {
+                    Text(text = "Tócame: $contador")
+                }
+                Button(onClick = onTareaLargaMala) {
+                    Text(text = "Tarea larga (MAL)")
+                }
+            }
+
             Text(
-                text = "Estructura inicial",
-                style = MaterialTheme.typography.bodyMedium
+                text = mensaje,
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }
