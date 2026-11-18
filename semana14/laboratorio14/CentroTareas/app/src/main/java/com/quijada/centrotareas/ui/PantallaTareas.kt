@@ -16,6 +16,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,6 +42,7 @@ fun PantallaTareas(
 ) {
     val mensaje by viewModel.mensaje.collectAsState()
     val progreso by viewModel.progreso.collectAsState()
+    val corriendo by viewModel.corriendo.collectAsState()
 
     Scaffold(
         topBar = {
@@ -70,7 +72,9 @@ fun PantallaTareas(
             TarjetaTareaConProgreso(
                 mensaje = mensaje,
                 progreso = progreso,
-                onTareaLarga = { viewModel.tareaLarga() }
+                corriendo = corriendo,
+                onTareaLarga = { viewModel.tareaLarga() },
+                onCancelarTarea = { viewModel.cancelarTarea() }
             )
             TarjetaContarPrimos()
             TarjetaDosCargas()
@@ -82,7 +86,9 @@ fun PantallaTareas(
 fun TarjetaTareaConProgreso(
     mensaje: String,
     progreso: Float,
-    onTareaLarga: () -> Unit
+    corriendo: Boolean,
+    onTareaLarga: () -> Unit,
+    onCancelarTarea: () -> Unit
 ) {
     var contador by remember { mutableIntStateOf(0) }
 
@@ -110,6 +116,12 @@ fun TarjetaTareaConProgreso(
                 }
                 Button(onClick = onTareaLarga) {
                     Text(text = "Iniciar")
+                }
+                OutlinedButton(
+                    onClick = onCancelarTarea,
+                    enabled = corriendo
+                ) {
+                    Text(text = "Cancelar")
                 }
             }
 
