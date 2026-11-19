@@ -71,6 +71,7 @@ fun PantallaTareas(
     val progreso by viewModel.progreso.collectAsState()
     val enProgreso by viewModel.enProgreso.collectAsState()
     val primos by viewModel.primos.collectAsState()
+    val progresoPrimos by viewModel.progresoPrimos.collectAsState()
     val carga by viewModel.carga.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
     val limitarTiempo by viewModel.limitarTiempo.collectAsState()
@@ -168,6 +169,7 @@ fun PantallaTareas(
                 // Tarjeta 2: Contar números primos
                 TarjetaContarPrimosFigma(
                     primosState = primos,
+                    progresoPrimos = progresoPrimos,
                     onCalcularPrimos = { hasta -> viewModel.calcularPrimos(hasta) },
                     onCancelarPrimos = { viewModel.cancelarPrimos() }
                 )
@@ -402,6 +404,7 @@ fun TarjetaTareaConProgresoFigma(
 @Composable
 fun TarjetaContarPrimosFigma(
     primosState: PrimosUi,
+    progresoPrimos: Float,
     onCalcularPrimos: (Int) -> Unit,
     onCancelarPrimos: () -> Unit
 ) {
@@ -550,24 +553,50 @@ fun TarjetaContarPrimosFigma(
             when (primosState) {
                 is PrimosUi.Inactivo -> {}
                 is PrimosUi.Calculando -> {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color(0xFFF3E8FF))
                             .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = Color(0xFF7C3AED)
-                        )
-                        Text(
-                            text = "Calculando números primos...",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF7C3AED)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    color = Color(0xFF7C3AED),
+                                    strokeWidth = 2.dp
+                                )
+                                Text(
+                                    text = "Calculando primos...",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF7C3AED)
+                                )
+                            }
+                            Text(
+                                text = "Calculando: ${(progresoPrimos * 100).toInt()} %",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF7C3AED)
+                            )
+                        }
+                        LinearProgressIndicator(
+                            progress = { progresoPrimos },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = Color(0xFF7C3AED),
+                            trackColor = Color(0xFFE9D5FF)
                         )
                     }
                 }

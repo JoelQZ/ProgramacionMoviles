@@ -3,6 +3,7 @@ package com.quijada.centrotareas.data
 import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -19,14 +20,19 @@ class TareasRepositoryLocal : TareasRepository {
         }
     }.flowOn(Dispatchers.Default)
 
-    override suspend fun contarPrimos(hasta: Int): Int = withContext(Dispatchers.Default) {
+    override suspend fun contarPrimos(hasta: Int, onProgreso: (Float) -> Unit): Int = withContext(Dispatchers.Default) {
         var contador = 0
+        val paso = (hasta / 100).coerceAtLeast(1)
         for (n in 2..hasta) {
-            ensureActive()
+            currentCoroutineContext().ensureActive()
             if (esPrimo(n)) {
                 contador++
             }
+            if (n % paso == 0 || n == hasta) {
+                onProgreso(n.toFloat() / hasta)
+            }
         }
+        onProgreso(1f)
         contador
     }
 
