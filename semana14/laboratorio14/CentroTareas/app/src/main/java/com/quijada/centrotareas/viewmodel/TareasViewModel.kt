@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 import kotlin.system.measureTimeMillis
 
 class TareasViewModel(
@@ -29,8 +30,8 @@ class TareasViewModel(
     private val _progreso = MutableStateFlow(0f)
     val progreso: StateFlow<Float> = _progreso.asStateFlow()
 
-    private val _corriendo = MutableStateFlow(false)
-    val corriendo: StateFlow<Boolean> = _corriendo.asStateFlow()
+    private val _enProgreso = MutableStateFlow(false)
+    val enProgreso: StateFlow<Boolean> = _enProgreso.asStateFlow()
 
     private val _primos = MutableStateFlow<PrimosUi>(PrimosUi.Inactivo)
     val primos: StateFlow<PrimosUi> = _primos.asStateFlow()
@@ -51,7 +52,8 @@ class TareasViewModel(
     fun tareaLarga() {
         jobTarea?.cancel()
         jobTarea = viewModelScope.launch {
-            _corriendo.value = true
+            val miJob = coroutineContext[Job]
+            _enProgreso.value = true
             _progreso.value = 0f
             _mensaje.value = "Trabajando..."
             Log.d("HILO", "Antes: ${Thread.currentThread().name}")
@@ -70,13 +72,18 @@ class TareasViewModel(
                 _mensaje.value = "Cancelado"
                 throw e
             } finally {
-                _corriendo.value = false
+                if (jobTarea == miJob) {
+                    _enProgreso.value = false
+                }
             }
         }
     }
 
     fun cancelarTarea() {
         jobTarea?.cancel()
+        _progreso.value = 0f
+        _mensaje.value = "Cancelado"
+        _enProgreso.value = false
     }
 
     fun calcularPrimos(hasta: Int) {
