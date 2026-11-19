@@ -38,8 +38,15 @@ class TareasViewModel(
     private val _carga = MutableStateFlow<CargaUi>(CargaUi.Idle)
     val carga: StateFlow<CargaUi> = _carga.asStateFlow()
 
+    private val _simularError = MutableStateFlow(false)
+    val simularError: StateFlow<Boolean> = _simularError.asStateFlow()
+
     private var jobTarea: Job? = null
     private var jobPrimos: Job? = null
+
+    fun cambiarSimularError(valor: Boolean) {
+        _simularError.value = valor
+    }
 
     fun tareaLarga() {
         jobTarea?.cancel()
@@ -106,7 +113,7 @@ class TareasViewModel(
                 var pedidos = emptyList<String>()
                 val ms = measureTimeMillis {
                     perfil = repository.cargarPerfil()
-                    pedidos = repository.cargarPedidos(false)
+                    pedidos = repository.cargarPedidos(_simularError.value)
                 }
                 _carga.value = CargaUi.Exito(
                     modo = "Una por una",
@@ -114,10 +121,9 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: Exception) {
-                _carga.value = CargaUi.Error(e.message ?: "Error desconocido")
+                if (e is CancellationException) throw e
+                _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
             }
         }
     }
@@ -131,7 +137,7 @@ class TareasViewModel(
                 val ms = measureTimeMillis {
                     val (p, ped) = coroutineScope {
                         val a = async { repository.cargarPerfil() }
-                        val b = async { repository.cargarPedidos(false) }
+                        val b = async { repository.cargarPedidos(_simularError.value) }
                         Pair(a.await(), b.await())
                     }
                     perfil = p
@@ -143,10 +149,9 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
-            } catch (e: CancellationException) {
-                throw e
             } catch (e: Exception) {
-                _carga.value = CargaUi.Error(e.message ?: "Error desconocido")
+                if (e is CancellationException) throw e
+                _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
             }
         }
     }

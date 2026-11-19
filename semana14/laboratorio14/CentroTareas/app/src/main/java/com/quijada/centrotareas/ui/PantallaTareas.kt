@@ -3,7 +3,6 @@ package com.quijada.centrotareas.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +22,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -54,6 +54,7 @@ fun PantallaTareas(
     val corriendo by viewModel.corriendo.collectAsState()
     val primos by viewModel.primos.collectAsState()
     val carga by viewModel.carga.collectAsState()
+    val simularError by viewModel.simularError.collectAsState()
 
     Scaffold(
         topBar = {
@@ -94,8 +95,11 @@ fun PantallaTareas(
             )
             TarjetaDosCargas(
                 cargaState = carga,
+                simularError = simularError,
+                onCambiarSimularError = { viewModel.cambiarSimularError(it) },
                 onCargarUnaPorUna = { viewModel.cargarUnaPorUna() },
-                onCargarALaVez = { viewModel.cargarALaVez() }
+                onCargarALaVez = { viewModel.cargarALaVez() },
+                onReintentar = { viewModel.cargarALaVez() }
             )
         }
     }
@@ -262,8 +266,11 @@ fun TarjetaContarPrimos(
 @Composable
 fun TarjetaDosCargas(
     cargaState: CargaUi,
+    simularError: Boolean,
+    onCambiarSimularError: (Boolean) -> Unit,
     onCargarUnaPorUna: () -> Unit,
-    onCargarALaVez: () -> Unit
+    onCargarALaVez: () -> Unit,
+    onReintentar: () -> Unit
 ) {
     val isLoading = cargaState is CargaUi.Cargando
 
@@ -281,6 +288,18 @@ fun TarjetaDosCargas(
                 color = Color.Blue,
                 fontWeight = FontWeight.Bold
             )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Simular error", style = MaterialTheme.typography.bodyMedium)
+                Switch(
+                    checked = simularError,
+                    onCheckedChange = onCambiarSimularError
+                )
+            }
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -334,12 +353,18 @@ fun TarjetaDosCargas(
                         shape = MaterialTheme.shapes.small,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
                             Text(
                                 text = cargaState.mensaje,
                                 color = Color(0xFFC62828),
                                 fontWeight = FontWeight.Bold
                             )
+                            OutlinedButton(onClick = onReintentar) {
+                                Text(text = "Reintentar", color = Color(0xFFC62828))
+                            }
                         }
                     }
                 }
