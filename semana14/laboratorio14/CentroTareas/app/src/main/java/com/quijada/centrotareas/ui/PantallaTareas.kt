@@ -59,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quijada.centrotareas.model.CargaUi
+import com.quijada.centrotareas.model.ComparacionFila
 import com.quijada.centrotareas.model.PrimosUi
 import com.quijada.centrotareas.viewmodel.TareasViewModel
 
@@ -76,6 +77,7 @@ fun PantallaTareas(
     val carga by viewModel.carga.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
     val limitarTiempo by viewModel.limitarTiempo.collectAsState()
+    val tablaComparacion by viewModel.tablaComparacion.collectAsState()
     val historial by viewModel.historial.collectAsState()
 
     Surface(
@@ -181,6 +183,7 @@ fun PantallaTareas(
                     cargaState = carga,
                     simularError = simularError,
                     limitarTiempo = limitarTiempo,
+                    tablaComparacion = tablaComparacion,
                     onCambiarSimularError = { viewModel.cambiarSimularError(it) },
                     onCambiarLimitarTiempo = { viewModel.cambiarLimitarTiempo(it) },
                     onCargarUnaPorUna = { viewModel.cargarUnaPorUna() },
@@ -657,6 +660,7 @@ fun TarjetaDosCargasFigma(
     cargaState: CargaUi,
     simularError: Boolean,
     limitarTiempo: Boolean,
+    tablaComparacion: List<ComparacionFila>,
     onCambiarSimularError: (Boolean) -> Unit,
     onCambiarLimitarTiempo: (Boolean) -> Unit,
     onCargarUnaPorUna: () -> Unit,
@@ -1001,6 +1005,65 @@ fun TarjetaDosCargasFigma(
                             ) {
                                 Text(text = "Reintentar", color = Color.White, fontWeight = FontWeight.Bold)
                             }
+                        }
+                    }
+                }
+            }
+
+            // Tabla de comparación compacta (Mejora 6)
+            if (tablaComparacion.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
+                        .background(Color.White)
+                ) {
+                    // Header de la tabla
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFF8FAFC))
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "#", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B), modifier = Modifier.weight(0.5f))
+                        Text(text = "Una por una", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B), modifier = Modifier.weight(1.2f))
+                        Text(text = "A la vez", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B), modifier = Modifier.weight(1.2f))
+                        Text(text = "Ahorro", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF64748B), modifier = Modifier.weight(1.1f), textAlign = TextAlign.End)
+                    }
+
+                    // Filas de la tabla
+                    tablaComparacion.forEach { fila ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "${fila.corrida}", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF0F172A), modifier = Modifier.weight(0.5f))
+                            Text(
+                                text = fila.tiempoSecuencialMs?.let { "${it} ms" } ?: "--",
+                                fontSize = 12.sp,
+                                color = Color(0xFF0F172A),
+                                modifier = Modifier.weight(1.2f)
+                            )
+                            Text(
+                                text = fila.tiempoConcurrenteMs?.let { "${it} ms" } ?: "--",
+                                fontSize = 12.sp,
+                                color = Color(0xFF0F172A),
+                                modifier = Modifier.weight(1.2f)
+                            )
+                            Text(
+                                text = fila.ahorroMs?.let { "-${it} ms" } ?: "--",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (fila.ahorroMs != null) Color(0xFF16A34A) else Color(0xFF94A3B8),
+                                modifier = Modifier.weight(1.1f),
+                                textAlign = TextAlign.End
+                            )
                         }
                     }
                 }

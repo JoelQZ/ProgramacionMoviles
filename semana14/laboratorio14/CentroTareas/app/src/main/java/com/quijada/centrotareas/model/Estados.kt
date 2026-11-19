@@ -22,3 +22,14 @@ sealed interface CargaUi {
     ) : CargaUi
     data class Error(val mensaje: String) : CargaUi
 }
+
+data class ComparacionFila(
+    val corrida: Int,
+    val tiempoSecuencialMs: Long? = null,
+    val tiempoConcurrenteMs: Long? = null
+) {
+    val ahorroMs: Long?
+        get() = if (tiempoSecuencialMs != null && tiempoConcurrenteMs != null) {
+            tiempoSecuencialMs - tiempoConcurrenteMs
+        } else null
+}

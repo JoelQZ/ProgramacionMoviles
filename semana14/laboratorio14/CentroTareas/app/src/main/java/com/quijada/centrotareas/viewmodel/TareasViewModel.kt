@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quijada.centrotareas.data.TareasRepository
 import com.quijada.centrotareas.model.CargaUi
+import com.quijada.centrotareas.model.ComparacionFila
 import com.quijada.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,9 @@ class TareasViewModel(
     private val _limitarTiempo = MutableStateFlow(false)
     val limitarTiempo: StateFlow<Boolean> = _limitarTiempo.asStateFlow()
 
+    private val _tablaComparacion = MutableStateFlow<List<ComparacionFila>>(emptyList())
+    val tablaComparacion: StateFlow<List<ComparacionFila>> = _tablaComparacion.asStateFlow()
+
     val historial: StateFlow<List<String>> = repository.historialResultados
         .stateIn(
             scope = viewModelScope,
@@ -72,6 +76,32 @@ class TareasViewModel(
         viewModelScope.launch {
             repository.limpiarHistorial()
         }
+    }
+
+    fun limpiarComparacion() {
+        _tablaComparacion.value = emptyList()
+    }
+
+    private fun registrarTiempoSecuencial(ms: Long) {
+        val lista = _tablaComparacion.value.toMutableList()
+        val ultima = lista.lastOrNull()
+        if (ultima == null || ultima.tiempoSecuencialMs != null) {
+            lista.add(ComparacionFila(corrida = lista.size + 1, tiempoSecuencialMs = ms))
+        } else {
+            lista[lista.lastIndex] = ultima.copy(tiempoSecuencialMs = ms)
+        }
+        _tablaComparacion.value = lista
+    }
+
+    private fun registrarTiempoConcurrente(ms: Long) {
+        val lista = _tablaComparacion.value.toMutableList()
+        val ultima = lista.lastOrNull()
+        if (ultima == null || ultima.tiempoConcurrenteMs != null) {
+            lista.add(ComparacionFila(corrida = lista.size + 1, tiempoConcurrenteMs = ms))
+        } else {
+            lista[lista.lastIndex] = ultima.copy(tiempoConcurrenteMs = ms)
+        }
+        _tablaComparacion.value = lista
     }
 
     fun tareaLarga() {
@@ -162,6 +192,7 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
+                registrarTiempoSecuencial(ms)
                 repository.guardarResultado("Carga Una por una: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado")
@@ -206,6 +237,7 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
+                registrarTiempoConcurrente(ms)
                 repository.guardarResultado("Carga A la vez: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado")
