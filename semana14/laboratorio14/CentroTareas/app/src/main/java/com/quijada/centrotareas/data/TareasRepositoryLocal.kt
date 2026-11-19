@@ -1,6 +1,7 @@
 package com.quijada.centrotareas.data
 
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -45,10 +46,38 @@ class TareasRepositoryLocal : TareasRepository {
     }
 
     override suspend fun cargarPedidos(simularError: Boolean): List<String> = withContext(Dispatchers.IO) {
-        delay(3000)
-        if (simularError) {
-            throw Exception("Sin conexión")
+        reintentarConBackoff(intentosMax = 3, delayInicialMs = 500L) {
+            delay(3000)
+            if (simularError) {
+                throw Exception("Sin conexión")
+            }
+            listOf("Pedido 1", "Pedido 2", "Pedido 3")
         }
-        listOf("Pedido 1", "Pedido 2", "Pedido 3")
+    }
+
+    private suspend fun <T> reintentarConBackoff(
+        intentosMax: Int = 3,
+        delayInicialMs: Long = 500L,
+        block: suspend () -> T
+    ): T {
+        for (intento in 0 until intentosMax) {
+            try {
+                return block()
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    throw e
+                }
+                if (intento == intentosMax - 1) {
+                    throw e
+                }
+                val espera = delayInicialMs * (1 shl intento)
+                Log.w(
+                    "REINTENTO",
+                    "Intento ${intento + 1} de $intentosMax fallido. Reintentando en ${espera}ms..."
+                )
+                delay(espera)
+            }
+        }
+        error("Inalcanzable")
     }
 }
