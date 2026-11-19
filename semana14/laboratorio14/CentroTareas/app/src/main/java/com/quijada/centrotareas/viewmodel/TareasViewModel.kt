@@ -13,8 +13,10 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.coroutineContext
@@ -48,6 +50,13 @@ class TareasViewModel(
     private val _limitarTiempo = MutableStateFlow(false)
     val limitarTiempo: StateFlow<Boolean> = _limitarTiempo.asStateFlow()
 
+    val historial: StateFlow<List<String>> = repository.historialResultados
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
+
     private var jobTarea: Job? = null
     private var jobPrimos: Job? = null
 
@@ -57,6 +66,12 @@ class TareasViewModel(
 
     fun cambiarLimitarTiempo(valor: Boolean) {
         _limitarTiempo.value = valor
+    }
+
+    fun limpiarHistorial() {
+        viewModelScope.launch {
+            repository.limpiarHistorial()
+        }
     }
 
     fun tareaLarga() {
@@ -110,6 +125,7 @@ class TareasViewModel(
                     cantidad = cantidad,
                     duracionMs = duracionMs
                 )
+                repository.guardarResultado("Primos hasta $hasta: $cantidad ($duracionMs ms)")
             } catch (e: CancellationException) {
                 _progresoPrimos.value = 0f
                 _primos.value = PrimosUi.Cancelado
@@ -146,6 +162,7 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
+                repository.guardarResultado("Carga Una por una: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado")
             } catch (e: CancellationException) {
@@ -189,6 +206,7 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
+                repository.guardarResultado("Carga A la vez: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado")
             } catch (e: CancellationException) {

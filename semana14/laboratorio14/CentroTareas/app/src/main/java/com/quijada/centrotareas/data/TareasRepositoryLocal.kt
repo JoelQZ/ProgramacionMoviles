@@ -1,6 +1,12 @@
 package com.quijada.centrotareas.data
 
+import android.content.Context
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
@@ -9,9 +15,36 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-class TareasRepositoryLocal : TareasRepository {
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "historial_tareas")
+private val KEY_HISTORIAL = stringPreferencesKey("ultimos_5")
+
+class TareasRepositoryLocal(
+    private val context: Context
+) : TareasRepository {
+
+    override val historialResultados: Flow<List<String>> = context.dataStore.data.map { preferences ->
+        val raw = preferences[KEY_HISTORIAL] ?: ""
+        if (raw.isBlank()) emptyList() else raw.split("||")
+    }
+
+    override suspend fun guardarResultado(registro: String) {
+        context.dataStore.edit { preferences ->
+            val actual = preferences[KEY_HISTORIAL] ?: ""
+            val listaActual = if (actual.isBlank()) emptyList() else actual.split("||")
+            val nuevaLista = (listOf(registro) + listaActual).take(5)
+            preferences[KEY_HISTORIAL] = nuevaLista.joinToString("||")
+        }
+    }
+
+    override suspend fun limpiarHistorial() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(KEY_HISTORIAL)
+        }
+    }
+
     override fun ejecutarTareaConProgreso(): Flow<Float> = flow {
         Log.d("HILO", "Flujo en hilo: ${Thread.currentThread().name}")
         for (i in 1..100) {

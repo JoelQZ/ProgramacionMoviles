@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CentroTareasTheme {
-                val factory = TareasViewModelFactory(TareasRepositoryLocal())
+                val factory = TareasViewModelFactory(TareasRepositoryLocal(applicationContext))
                 val viewModel: TareasViewModel = viewModel(factory = factory)
                 PantallaTareas(viewModel = viewModel)
             }

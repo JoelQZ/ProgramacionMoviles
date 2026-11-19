@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Calculate
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Schedule
@@ -75,6 +76,7 @@ fun PantallaTareas(
     val carga by viewModel.carga.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
     val limitarTiempo by viewModel.limitarTiempo.collectAsState()
+    val historial by viewModel.historial.collectAsState()
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -148,7 +150,7 @@ fun PantallaTareas(
                         shape = RoundedCornerShape(50.dp)
                     ) {
                         Text(
-                            text = "3 MÓDULOS",
+                            text = "4 MÓDULOS",
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
@@ -184,6 +186,12 @@ fun PantallaTareas(
                     onCargarUnaPorUna = { viewModel.cargarUnaPorUna() },
                     onCargarALaVez = { viewModel.cargarALaVez() },
                     onReintentar = { viewModel.cargarALaVez() }
+                )
+
+                // Tarjeta 4: Historial reciente (Mejora 5)
+                TarjetaHistorialFigma(
+                    historial = historial,
+                    onLimpiarHistorial = { viewModel.limpiarHistorial() }
                 )
 
                 // --- FOOTER ---
@@ -992,6 +1000,136 @@ fun TarjetaDosCargasFigma(
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))
                             ) {
                                 Text(text = "Reintentar", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TarjetaHistorialFigma(
+    historial: List<String>,
+    onLimpiarHistorial: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFFEF3C7)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.History,
+                            contentDescription = null,
+                            tint = Color(0xFFD97706),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Historial reciente",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0F172A)
+                        )
+                        Text(
+                            text = "Últimos 5 resultados guardados",
+                            fontSize = 12.sp,
+                            color = Color(0xFF64748B)
+                        )
+                    }
+                }
+
+                if (historial.isNotEmpty()) {
+                    Surface(
+                        color = Color(0xFFFEF2F2),
+                        shape = RoundedCornerShape(50.dp),
+                        modifier = Modifier.clickable { onLimpiarHistorial() }
+                    ) {
+                        Text(
+                            text = "Limpiar",
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFDC2626)
+                        )
+                    }
+                }
+            }
+
+            if (historial.isEmpty()) {
+                Surface(
+                    color = Color(0xFFF8FAFC),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Aún no hay registros guardados",
+                        modifier = Modifier.padding(16.dp),
+                        fontSize = 13.sp,
+                        color = Color(0xFF64748B),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    historial.forEachIndexed { index, registro ->
+                        Surface(
+                            color = Color(0xFFF8FAFC),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFFFEF3C7)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "${index + 1}",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFD97706)
+                                    )
+                                }
+                                Text(
+                                    text = registro,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color(0xFF0F172A)
+                                )
                             }
                         }
                     }
