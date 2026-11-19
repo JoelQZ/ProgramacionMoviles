@@ -11,12 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 import kotlin.system.measureTimeMillis
 
@@ -58,12 +56,8 @@ class TareasViewModel(
             _mensaje.value = "Trabajando..."
             Log.d("HILO", "Antes: ${Thread.currentThread().name}")
             try {
-                withContext(Dispatchers.Default) {
-                    Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
-                    for (i in 1..100) {
-                        delay(40)
-                        _progreso.value = i / 100f
-                    }
+                repository.ejecutarTareaConProgreso().collect { valor ->
+                    _progreso.value = valor
                 }
                 Log.d("HILO", "Despues: ${Thread.currentThread().name}")
                 _mensaje.value = "Terminó"
