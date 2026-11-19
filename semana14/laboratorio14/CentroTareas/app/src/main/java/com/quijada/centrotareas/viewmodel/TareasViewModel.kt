@@ -9,12 +9,14 @@ import com.quijada.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.coroutineContext
 import kotlin.system.measureTimeMillis
 
@@ -40,11 +42,18 @@ class TareasViewModel(
     private val _simularError = MutableStateFlow(false)
     val simularError: StateFlow<Boolean> = _simularError.asStateFlow()
 
+    private val _limitarTiempo = MutableStateFlow(false)
+    val limitarTiempo: StateFlow<Boolean> = _limitarTiempo.asStateFlow()
+
     private var jobTarea: Job? = null
     private var jobPrimos: Job? = null
 
     fun cambiarSimularError(valor: Boolean) {
         _simularError.value = valor
+    }
+
+    fun cambiarLimitarTiempo(valor: Boolean) {
+        _limitarTiempo.value = valor
     }
 
     fun tareaLarga() {
@@ -113,8 +122,15 @@ class TareasViewModel(
                 var perfil = ""
                 var pedidos = emptyList<String>()
                 val ms = measureTimeMillis {
-                    perfil = repository.cargarPerfil()
-                    pedidos = repository.cargarPedidos(_simularError.value)
+                    if (_limitarTiempo.value) {
+                        withTimeout(2000L) {
+                            perfil = repository.cargarPerfil()
+                            pedidos = repository.cargarPedidos(_simularError.value)
+                        }
+                    } else {
+                        perfil = repository.cargarPerfil()
+                        pedidos = repository.cargarPedidos(_simularError.value)
+                    }
                 }
                 _carga.value = CargaUi.Exito(
                     modo = "Una por una",
@@ -122,8 +138,11 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
+            } catch (e: TimeoutCancellationException) {
+                _carga.value = CargaUi.Error("Tardó demasiado")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                if (e is CancellationException) throw e
                 _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
             }
         }
@@ -136,13 +155,25 @@ class TareasViewModel(
                 var perfil = ""
                 var pedidos = emptyList<String>()
                 val ms = measureTimeMillis {
-                    val (p, ped) = coroutineScope {
-                        val a = async { repository.cargarPerfil() }
-                        val b = async { repository.cargarPedidos(_simularError.value) }
-                        Pair(a.await(), b.await())
+                    if (_limitarTiempo.value) {
+                        withTimeout(2000L) {
+                            val (p, ped) = coroutineScope {
+                                val a = async { repository.cargarPerfil() }
+                                val b = async { repository.cargarPedidos(_simularError.value) }
+                                Pair(a.await(), b.await())
+                            }
+                            perfil = p
+                            pedidos = ped
+                        }
+                    } else {
+                        val (p, ped) = coroutineScope {
+                            val a = async { repository.cargarPerfil() }
+                            val b = async { repository.cargarPedidos(_simularError.value) }
+                            Pair(a.await(), b.await())
+                        }
+                        perfil = p
+                        pedidos = ped
                     }
-                    perfil = p
-                    pedidos = ped
                 }
                 _carga.value = CargaUi.Exito(
                     modo = "A la vez",
@@ -150,8 +181,11 @@ class TareasViewModel(
                     cantidadPedidos = pedidos.size,
                     duracionMs = ms
                 )
+            } catch (e: TimeoutCancellationException) {
+                _carga.value = CargaUi.Error("Tardó demasiado")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                if (e is CancellationException) throw e
                 _carga.value = CargaUi.Error("No se pudo cargar: ${e.message}")
             }
         }

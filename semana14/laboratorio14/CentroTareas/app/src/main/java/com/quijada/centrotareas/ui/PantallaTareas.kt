@@ -73,6 +73,7 @@ fun PantallaTareas(
     val primos by viewModel.primos.collectAsState()
     val carga by viewModel.carga.collectAsState()
     val simularError by viewModel.simularError.collectAsState()
+    val limitarTiempo by viewModel.limitarTiempo.collectAsState()
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -175,7 +176,9 @@ fun PantallaTareas(
                 TarjetaDosCargasFigma(
                     cargaState = carga,
                     simularError = simularError,
+                    limitarTiempo = limitarTiempo,
                     onCambiarSimularError = { viewModel.cambiarSimularError(it) },
+                    onCambiarLimitarTiempo = { viewModel.cambiarLimitarTiempo(it) },
                     onCargarUnaPorUna = { viewModel.cargarUnaPorUna() },
                     onCargarALaVez = { viewModel.cargarALaVez() },
                     onReintentar = { viewModel.cargarALaVez() }
@@ -616,7 +619,9 @@ fun TarjetaContarPrimosFigma(
 fun TarjetaDosCargasFigma(
     cargaState: CargaUi,
     simularError: Boolean,
+    limitarTiempo: Boolean,
     onCambiarSimularError: (Boolean) -> Unit,
+    onCambiarLimitarTiempo: (Boolean) -> Unit,
     onCargarUnaPorUna: () -> Unit,
     onCargarALaVez: () -> Unit,
     onReintentar: () -> Unit
@@ -821,6 +826,39 @@ fun TarjetaDosCargasFigma(
                 Switch(
                     checked = simularError,
                     onCheckedChange = onCambiarSimularError,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFF2563EB)
+                    )
+                )
+            }
+
+            // Límite de tiempo switch container (Mejora 2)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF8FAFC))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Límite de tiempo (2 s)",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF0F172A)
+                    )
+                    Text(
+                        text = "Cancela si supera 2000 ms con withTimeout",
+                        fontSize = 12.sp,
+                        color = Color(0xFF64748B)
+                    )
+                }
+                Switch(
+                    checked = limitarTiempo,
+                    onCheckedChange = onCambiarLimitarTiempo,
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = Color(0xFF2563EB)
