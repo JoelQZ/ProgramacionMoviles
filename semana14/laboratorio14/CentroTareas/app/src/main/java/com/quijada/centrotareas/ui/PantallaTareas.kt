@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.quijada.centrotareas.model.CargaUi
 import com.quijada.centrotareas.model.PrimosUi
 import com.quijada.centrotareas.viewmodel.TareasViewModel
 
@@ -52,6 +53,7 @@ fun PantallaTareas(
     val progreso by viewModel.progreso.collectAsState()
     val corriendo by viewModel.corriendo.collectAsState()
     val primos by viewModel.primos.collectAsState()
+    val carga by viewModel.carga.collectAsState()
 
     Scaffold(
         topBar = {
@@ -90,7 +92,11 @@ fun PantallaTareas(
                 onCalcularPrimos = { hasta -> viewModel.calcularPrimos(hasta) },
                 onCancelarPrimos = { viewModel.cancelarPrimos() }
             )
-            TarjetaDosCargas()
+            TarjetaDosCargas(
+                cargaState = carga,
+                onCargarUnaPorUna = { viewModel.cargarUnaPorUna() },
+                onCargarALaVez = { viewModel.cargarALaVez() }
+            )
         }
     }
 }
@@ -254,13 +260,20 @@ fun TarjetaContarPrimos(
 }
 
 @Composable
-fun TarjetaDosCargas() {
+fun TarjetaDosCargas(
+    cargaState: CargaUi,
+    onCargarUnaPorUna: () -> Unit,
+    onCargarALaVez: () -> Unit
+) {
+    val isLoading = cargaState is CargaUi.Cargando
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = "Dos cargas",
@@ -268,10 +281,74 @@ fun TarjetaDosCargas() {
                 color = Color.Blue,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(
+                    onClick = onCargarUnaPorUna,
+                    enabled = !isLoading
+                ) {
+                    Text(text = "Una por una")
+                }
+
+                Button(
+                    onClick = onCargarALaVez,
+                    enabled = !isLoading
+                ) {
+                    Text(text = "A la vez")
+                }
+            }
+
+            if (isLoading) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Text(text = "Cargando datos...", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+
+            when (cargaState) {
+                is CargaUi.Idle -> {}
+                is CargaUi.Cargando -> {}
+                is CargaUi.Exito -> {
+                    Surface(
+                        color = Color(0xFFE8F5E9),
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(text = "Modo: ${cargaState.modo}", fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+                            Text(text = "Perfil: ${cargaState.perfil}", color = Color(0xFF2E7D32))
+                            Text(text = "Pedidos: ${cargaState.cantidadPedidos}", color = Color(0xFF2E7D32))
+                            Text(text = "Tiempo: ${cargaState.duracionMs} ms", color = Color(0xFF2E7D32))
+                        }
+                    }
+                }
+                is CargaUi.Error -> {
+                    Surface(
+                        color = Color(0xFFFFEBEE),
+                        shape = MaterialTheme.shapes.small,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = cargaState.mensaje,
+                                color = Color(0xFFC62828),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
             Text(
-                text = "Estructura inicial",
-                style = MaterialTheme.typography.bodyMedium
+                text = "«Una por una» tarda ≈ 5000 ms",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

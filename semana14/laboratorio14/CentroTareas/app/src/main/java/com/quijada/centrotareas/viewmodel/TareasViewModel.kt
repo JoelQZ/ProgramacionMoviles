@@ -4,10 +4,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quijada.centrotareas.data.TareasRepository
+import com.quijada.centrotareas.model.CargaUi
 import com.quijada.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +34,9 @@ class TareasViewModel(
 
     private val _primos = MutableStateFlow<PrimosUi>(PrimosUi.Inactivo)
     val primos: StateFlow<PrimosUi> = _primos.asStateFlow()
+
+    private val _carga = MutableStateFlow<CargaUi>(CargaUi.Idle)
+    val carga: StateFlow<CargaUi> = _carga.asStateFlow()
 
     private var jobTarea: Job? = null
     private var jobPrimos: Job? = null
@@ -90,5 +96,58 @@ class TareasViewModel(
 
     fun cancelarPrimos() {
         jobPrimos?.cancel()
+    }
+
+    fun cargarUnaPorUna() {
+        viewModelScope.launch {
+            _carga.value = CargaUi.Cargando
+            try {
+                var perfil = ""
+                var pedidos = emptyList<String>()
+                val ms = measureTimeMillis {
+                    perfil = repository.cargarPerfil()
+                    pedidos = repository.cargarPedidos(false)
+                }
+                _carga.value = CargaUi.Exito(
+                    modo = "Una por una",
+                    perfil = perfil,
+                    cantidadPedidos = pedidos.size,
+                    duracionMs = ms
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _carga.value = CargaUi.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
+
+    fun cargarALaVez() {
+        viewModelScope.launch {
+            _carga.value = CargaUi.Cargando
+            try {
+                var perfil = ""
+                var pedidos = emptyList<String>()
+                val ms = measureTimeMillis {
+                    val (p, ped) = coroutineScope {
+                        val a = async { repository.cargarPerfil() }
+                        val b = async { repository.cargarPedidos(false) }
+                        Pair(a.await(), b.await())
+                    }
+                    perfil = p
+                    pedidos = ped
+                }
+                _carga.value = CargaUi.Exito(
+                    modo = "A la vez",
+                    perfil = perfil,
+                    cantidadPedidos = pedidos.size,
+                    duracionMs = ms
+                )
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _carga.value = CargaUi.Error(e.message ?: "Error desconocido")
+            }
+        }
     }
 }

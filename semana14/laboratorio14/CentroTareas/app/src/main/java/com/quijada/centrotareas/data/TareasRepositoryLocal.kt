@@ -1,6 +1,7 @@
 package com.quijada.centrotareas.data
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
@@ -26,14 +27,16 @@ class TareasRepositoryLocal : TareasRepository {
         return true
     }
 
-    override suspend fun cargarPerfil(): String {
-        return "Ana Torres (ficticia)"
+    override suspend fun cargarPerfil(): String = withContext(Dispatchers.IO) {
+        delay(2000)
+        "Ana Torres (ficticia)"
     }
 
-    override suspend fun cargarPedidos(simularError: Boolean): List<String> {
+    override suspend fun cargarPedidos(simularError: Boolean): List<String> = withContext(Dispatchers.IO) {
+        delay(3000)
         if (simularError) {
             throw Exception("Sin conexión")
         }
-        return listOf("Pedido 1", "Pedido 2", "Pedido 3")
+        listOf("Pedido 1", "Pedido 2", "Pedido 3")
     }
 }
