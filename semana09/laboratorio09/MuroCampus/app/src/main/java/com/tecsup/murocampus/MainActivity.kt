@@ -2,6 +2,7 @@ package com.tecsup.murocampus
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,10 +13,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tecsup.murocampus.data.PostRepositoryRemote
 import com.tecsup.murocampus.data.remote.RetrofitClient
+import com.tecsup.murocampus.ui.PantallaDetalle
 import com.tecsup.murocampus.ui.PantallaLista
 import com.tecsup.murocampus.ui.theme.MuroCampusTheme
 import com.tecsup.murocampus.viewmodel.PostsViewModel
@@ -33,6 +39,12 @@ class MainActivity : ComponentActivity() {
                     factory = PostsViewModelFactory(repository)
                 )
 
+        var idSeleccionado by remember { mutableStateOf<Int?>(null) }
+
+        BackHandler(enabled = idSeleccionado != null) {
+            idSeleccionado = null
+        }
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
@@ -45,10 +57,23 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    PantallaLista(
-                        vm = viewModel,
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    val currentId = idSeleccionado
+                    if (currentId == null) {
+                        PantallaLista(
+                            vm = viewModel,
+                            onPostClick = { id ->
+                                idSeleccionado = id
+                                viewModel.abrir(id)
+                            },
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    } else {
+                        PantallaDetalle(
+                            vm = viewModel,
+                            postId = currentId,
+                            modifier = Modifier.padding(innerPadding)
+                        )
+                    }
                 }
             }
         }
