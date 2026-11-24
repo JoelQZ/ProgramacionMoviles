@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
@@ -34,6 +35,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -52,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.murocampus.viewmodel.PostsViewModel
 import com.tecsup.murocampus.viewmodel.UiState
+import kotlinx.coroutines.delay
 
 @Composable
 fun PantallaDetalle(
@@ -62,12 +65,24 @@ fun PantallaDetalle(
 ) {
     val estado by vm.detalle.collectAsStateWithLifecycle()
     val eliminacionState by vm.eliminacion.collectAsStateWithLifecycle()
+    val edicionState by vm.edicion.collectAsStateWithLifecycle()
+
     var mostrarConfirmacion by remember { mutableStateOf(false) }
+    var mostrarEdicion by remember { mutableStateOf(false) }
+    var nuevoTitulo by remember { mutableStateOf("") }
 
     LaunchedEffect(eliminacionState) {
         if (eliminacionState is UiState.Exito) {
             vm.limpiarEliminacion()
             onBackClick()
+        }
+    }
+
+    LaunchedEffect(edicionState) {
+        if (edicionState is UiState.Exito) {
+            delay(800L)
+            mostrarEdicion = false
+            vm.limpiarEdicion()
         }
     }
 
@@ -88,6 +103,83 @@ fun PantallaDetalle(
             },
             dismissButton = {
                 TextButton(onClick = { mostrarConfirmacion = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    if (mostrarEdicion) {
+        AlertDialog(
+            onDismissRequest = {
+                mostrarEdicion = false
+                vm.limpiarEdicion()
+            },
+            title = { Text("Editar título", fontWeight = FontWeight.Bold) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = nuevoTitulo,
+                        onValueChange = { nuevoTitulo = it },
+                        label = { Text("Nuevo título") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    when (val edState = edicionState) {
+                        is UiState.Cargando -> {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    color = Color(0xFF2563EB),
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Guardando cambios...", style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
+                        is UiState.Exito -> {
+                            Text(
+                                text = "Título actualizado: ${edState.datos.title}",
+                                color = Color(0xFF047857),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        is UiState.Error -> {
+                            Text(
+                                text = edState.mensaje,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        else -> {}
+                    }
+                }
+            },
+            confirmButton = {
+                val currentPost = (estado as? UiState.Exito)?.datos?.post
+                val esValido = nuevoTitulo.isNotBlank() && currentPost != null && nuevoTitulo != currentPost.title
+                val isCargando = edicionState is UiState.Cargando
+
+                TextButton(
+                    onClick = {
+                        vm.editarTitulo(postId, nuevoTitulo)
+                    },
+                    enabled = esValido && !isCargando
+                ) {
+                    Text("Guardar cambios", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        mostrarEdicion = false
+                        vm.limpiarEdicion()
+                    }
+                ) {
                     Text("Cancelar")
                 }
             }
@@ -122,6 +214,23 @@ fun PantallaDetalle(
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = {
+                        val currentPost = (estado as? UiState.Exito)?.datos?.post
+                        if (currentPost != null) {
+                            nuevoTitulo = currentPost.title
+                            vm.limpiarEdicion()
+                            mostrarEdicion = true
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Edit,
+                        contentDescription = "Editar",
+                        tint = Color(0xFF2563EB)
+                    )
+                }
+
                 IconButton(onClick = { mostrarConfirmacion = true }) {
                     Icon(
                         imageVector = Icons.Rounded.DeleteOutline,

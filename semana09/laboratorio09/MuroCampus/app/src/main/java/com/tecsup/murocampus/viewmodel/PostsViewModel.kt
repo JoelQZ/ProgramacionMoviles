@@ -61,6 +61,9 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _eliminacion = MutableStateFlow<UiState<Unit>?>(null)
     val eliminacion: StateFlow<UiState<Unit>?> = _eliminacion.asStateFlow()
 
+    private val _edicion = MutableStateFlow<UiState<Post>?>(null)
+    val edicion: StateFlow<UiState<Post>?> = _edicion.asStateFlow()
+
     init {
         cargar()
     }
@@ -153,5 +156,36 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
     fun limpiarEliminacion() {
         _eliminacion.value = null
+    }
+
+    fun editarTitulo(id: Int, nuevoTitulo: String) {
+        viewModelScope.launch {
+            _edicion.value = UiState.Cargando
+            val resultado = repo.editarTitulo(id, nuevoTitulo)
+            resultado.fold(
+                onSuccess = { postActualizado ->
+                    _edicion.value = UiState.Exito(postActualizado)
+                    
+                    // Actualizar _detalle si coincide
+                    val currentDetalle = _detalle.value
+                    if (currentDetalle is UiState.Exito && currentDetalle.datos.post.id == id) {
+                        _detalle.value = UiState.Exito(currentDetalle.datos.copy(post = postActualizado))
+                    }
+
+                    // Actualizar _lista
+                    val currentList = _lista.value
+                    if (currentList is UiState.Exito) {
+                        _lista.value = UiState.Exito(currentList.datos.map { if (it.id == id) postActualizado else it })
+                    }
+                },
+                onFailure = {
+                    _edicion.value = UiState.Error(mensajeDe(it))
+                }
+            )
+        }
+    }
+
+    fun limpiarEdicion() {
+        _edicion.value = null
     }
 }
