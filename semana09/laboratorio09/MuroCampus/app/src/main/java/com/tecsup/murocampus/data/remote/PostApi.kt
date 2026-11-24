@@ -34,4 +34,7 @@ interface PostApi {
 
     @PATCH("posts/{id}")
     suspend fun editarTitulo(@Path("id") id: Int, @Body body: EditarTitulo): Post
+
+    @GET("posts")
+    suspend fun listarPaginado(@Query("_start") start: Int, @Query("_limit") limit: Int = 20): List<Post>
 }

@@ -16,6 +16,7 @@ interface PostRepository {
     suspend fun crear(nuevo: NuevoPost): Result<Post>
     suspend fun eliminar(id: Int): Result<Unit>
     suspend fun editarTitulo(id: Int, nuevoTitulo: String): Result<Post>
+    suspend fun listarPaginado(start: Int, limit: Int = 20): Result<List<Post>>
 }
 
 class PostRepositoryRemote(private val api: PostApi) : PostRepository {
@@ -55,5 +56,9 @@ class PostRepositoryRemote(private val api: PostApi) : PostRepository {
 
     override suspend fun editarTitulo(id: Int, nuevoTitulo: String): Result<Post> = llamar {
         api.editarTitulo(id, EditarTitulo(nuevoTitulo))
+    }
+
+    override suspend fun listarPaginado(start: Int, limit: Int): Result<List<Post>> = llamar {
+        api.listarPaginado(start, limit)
     }
 }

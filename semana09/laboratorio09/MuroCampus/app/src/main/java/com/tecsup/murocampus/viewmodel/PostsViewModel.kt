@@ -64,6 +64,12 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _edicion = MutableStateFlow<UiState<Post>?>(null)
     val edicion: StateFlow<UiState<Post>?> = _edicion.asStateFlow()
 
+    private val _cargandoMas = MutableStateFlow(false)
+    val cargandoMas: StateFlow<Boolean> = _cargandoMas.asStateFlow()
+
+    private val _hayMasPaginas = MutableStateFlow(true)
+    val hayMasPaginas: StateFlow<Boolean> = _hayMasPaginas.asStateFlow()
+
     init {
         cargar()
     }
@@ -81,15 +87,48 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         viewModelScope.launch {
             _lista.value = UiState.Cargando
             val userId = _usuarioFiltro.value
-            val resultado = if (userId == null) {
-                repo.listar()
+            if (userId == null) {
+                _hayMasPaginas.value = true
+                val resultado = repo.listarPaginado(start = 0, limit = 20)
+                _lista.value = resultado.fold(
+                    onSuccess = { posts ->
+                        if (posts.size < 20) {
+                            _hayMasPaginas.value = false
+                        }
+                        UiState.Exito(posts)
+                    },
+                    onFailure = { UiState.Error(mensajeDe(it)) }
+                )
             } else {
-                repo.porUsuario(userId)
+                val resultado = repo.porUsuario(userId)
+                _lista.value = resultado.fold(
+                    onSuccess = { UiState.Exito(it) },
+                    onFailure = { UiState.Error(mensajeDe(it)) }
+                )
             }
-            _lista.value = resultado.fold(
-                onSuccess = { UiState.Exito(it) },
-                onFailure = { UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    fun cargarMas() {
+        if (_usuarioFiltro.value != null || _cargandoMas.value || !_hayMasPaginas.value) return
+        val currentListState = _lista.value
+        if (currentListState !is UiState.Exito) return
+
+        viewModelScope.launch {
+            _cargandoMas.value = true
+            val actuales = currentListState.datos
+            val resultado = repo.listarPaginado(start = actuales.size, limit = 20)
+            resultado.fold(
+                onSuccess = { nuevos ->
+                    val combinados = actuales + nuevos
+                    _lista.value = UiState.Exito(combinados)
+                    if (nuevos.size < 20 || nuevos.isEmpty()) {
+                        _hayMasPaginas.value = false
+                    }
+                },
+                onFailure = {}
             )
+            _cargandoMas.value = false
         }
     }
 
@@ -166,13 +205,11 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
                 onSuccess = { postActualizado ->
                     _edicion.value = UiState.Exito(postActualizado)
                     
-                    // Actualizar _detalle si coincide
                     val currentDetalle = _detalle.value
                     if (currentDetalle is UiState.Exito && currentDetalle.datos.post.id == id) {
                         _detalle.value = UiState.Exito(currentDetalle.datos.copy(post = postActualizado))
                     }
 
-                    // Actualizar _lista
                     val currentList = _lista.value
                     if (currentList is UiState.Exito) {
                         _lista.value = UiState.Exito(currentList.datos.map { if (it.id == id) postActualizado else it })

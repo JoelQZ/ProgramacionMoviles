@@ -32,9 +32,11 @@ import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -62,6 +64,8 @@ fun PantallaLista(
     val estado by vm.listaFiltrada.collectAsStateWithLifecycle()
     val usuarioFiltro by vm.usuarioFiltro.collectAsStateWithLifecycle()
     val busqueda by vm.busqueda.collectAsStateWithLifecycle()
+    val cargandoMas by vm.cargandoMas.collectAsStateWithLifecycle()
+    val hayMasPaginas by vm.hayMasPaginas.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -287,6 +291,44 @@ fun PantallaLista(
                                     post = post,
                                     onClick = { onPostClick(post.id) }
                                 )
+                            }
+
+                            if (usuarioFiltro == null) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 20.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (cargandoMas) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(28.dp),
+                                                color = Color(0xFF2563EB),
+                                                strokeWidth = 2.5.dp
+                                            )
+                                        } else if (hayMasPaginas) {
+                                            OutlinedButton(
+                                                onClick = { vm.cargarMas() },
+                                                shape = RoundedCornerShape(50),
+                                                border = BorderStroke(1.dp, Color(0xFF2563EB))
+                                            ) {
+                                                Text(
+                                                    text = "Cargar más",
+                                                    color = Color(0xFF2563EB),
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        } else {
+                                            Text(
+                                                text = "Has llegado al final del muro",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = Color(0xFF94A3B8),
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
