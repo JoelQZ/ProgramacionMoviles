@@ -7,16 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +30,6 @@ sealed interface PantallaDestino {
 }
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -60,30 +50,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopAppBar(
-                            title = { Text("MuroCampus") },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                titleContentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        )
-                    },
-                    floatingActionButton = {
-                        if (pantallaActual is PantallaDestino.Lista) {
-                            FloatingActionButton(
-                                onClick = {
-                                    viewModel.limpiarCreacion()
-                                    pantallaActual = PantallaDestino.Crear
-                                },
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            ) {
-                                Icon(Icons.Default.Add, contentDescription = "Crear publicación")
-                            }
-                        }
-                    }
+                    modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
                     when (val destino = pantallaActual) {
                         is PantallaDestino.Lista -> {
@@ -93,6 +60,10 @@ class MainActivity : ComponentActivity() {
                                     pantallaActual = PantallaDestino.Detalle(id)
                                     viewModel.abrir(id)
                                 },
+                                onCreateClick = {
+                                    viewModel.limpiarCreacion()
+                                    pantallaActual = PantallaDestino.Crear
+                                },
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }
@@ -100,12 +71,19 @@ class MainActivity : ComponentActivity() {
                             PantallaDetalle(
                                 vm = viewModel,
                                 postId = destino.id,
+                                onBackClick = {
+                                    pantallaActual = PantallaDestino.Lista
+                                },
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }
                         is PantallaDestino.Crear -> {
                             PantallaCrear(
                                 vm = viewModel,
+                                onBackClick = {
+                                    viewModel.limpiarCreacion()
+                                    pantallaActual = PantallaDestino.Lista
+                                },
                                 modifier = Modifier.padding(innerPadding)
                             )
                         }
