@@ -23,18 +23,25 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
+import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +61,38 @@ fun PantallaDetalle(
     modifier: Modifier = Modifier
 ) {
     val estado by vm.detalle.collectAsStateWithLifecycle()
+    val eliminacionState by vm.eliminacion.collectAsStateWithLifecycle()
+    var mostrarConfirmacion by remember { mutableStateOf(false) }
+
+    LaunchedEffect(eliminacionState) {
+        if (eliminacionState is UiState.Exito) {
+            vm.limpiarEliminacion()
+            onBackClick()
+        }
+    }
+
+    if (mostrarConfirmacion) {
+        AlertDialog(
+            onDismissRequest = { mostrarConfirmacion = false },
+            title = { Text("¿Eliminar publicación?", fontWeight = FontWeight.Bold) },
+            text = { Text("Esta acción eliminará la publicación del muro.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarConfirmacion = false
+                        vm.eliminar(postId)
+                    }
+                ) {
+                    Text("Eliminar", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarConfirmacion = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = modifier
@@ -82,12 +121,71 @@ fun PantallaDetalle(
                 color = Color(0xFF0F172A)
             )
 
-            IconButton(onClick = {}) {
-                Icon(
-                    imageVector = Icons.Rounded.MoreHoriz,
-                    contentDescription = "Opciones",
-                    tint = Color(0xFF94A3B8)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { mostrarConfirmacion = true }) {
+                    Icon(
+                        imageVector = Icons.Rounded.DeleteOutline,
+                        contentDescription = "Eliminar",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                IconButton(onClick = {}) {
+                    Icon(
+                        imageVector = Icons.Rounded.MoreHoriz,
+                        contentDescription = "Opciones",
+                        tint = Color(0xFF94A3B8)
+                    )
+                }
+            }
+        }
+
+        if (eliminacionState is UiState.Cargando) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFEFF6FF)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        color = Color(0xFF2563EB),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Eliminando publicación...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF1E40AF),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        } else if (eliminacionState is UiState.Error) {
+            val err = (eliminacionState as UiState.Error).mensaje
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFEF2F2)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = err,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF991B1B)
+                    )
+                }
             }
         }
 
