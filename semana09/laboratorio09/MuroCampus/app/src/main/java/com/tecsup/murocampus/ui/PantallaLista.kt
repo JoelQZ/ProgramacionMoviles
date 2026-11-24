@@ -27,11 +27,16 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Campaign
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,8 +59,9 @@ fun PantallaLista(
     onCreateClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    val estado by vm.lista.collectAsStateWithLifecycle()
+    val estado by vm.listaFiltrada.collectAsStateWithLifecycle()
     val usuarioFiltro by vm.usuarioFiltro.collectAsStateWithLifecycle()
+    val busqueda by vm.busqueda.collectAsStateWithLifecycle()
 
     Column(
         modifier = modifier
@@ -173,11 +179,53 @@ fun PantallaLista(
             }
         }
 
+        // Campo de Búsqueda por Título
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { vm.buscar(it) },
+            placeholder = {
+                Text(
+                    text = "Buscar publicación por título...",
+                    color = Color(0xFF94A3B8),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Buscar",
+                    tint = Color(0xFF2563EB)
+                )
+            },
+            trailingIcon = {
+                if (busqueda.isNotEmpty()) {
+                    IconButton(onClick = { vm.buscar("") }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Close,
+                            contentDescription = "Limpiar búsqueda",
+                            tint = Color(0xFF94A3B8)
+                        )
+                    }
+                }
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(50),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                focusedBorderColor = Color(0xFF2563EB),
+                unfocusedBorderColor = Color(0xFFE2E8F0)
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp)
+        )
+
         // LazyRow de Chips Filtrables
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
@@ -216,11 +264,18 @@ fun PantallaLista(
                 is UiState.Exito -> {
                     if (est.datos.isEmpty()) {
                         Box(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(24.dp),
                             contentAlignment = Alignment.Center
                         ) {
+                            val mensajeVacio = if (busqueda.isNotBlank()) {
+                                "No se encontraron publicaciones para \"$busqueda\""
+                            } else {
+                                "Sin publicaciones"
+                            }
                             Text(
-                                text = "Sin publicaciones",
+                                text = mensajeVacio,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Color(0xFF64748B)
                             )
