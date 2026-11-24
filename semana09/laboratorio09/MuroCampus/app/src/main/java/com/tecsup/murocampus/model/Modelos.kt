@@ -1,3 +1,4 @@
+// Modelos de datos de MuroCampus
 package com.tecsup.murocampus.model
 
 import kotlinx.serialization.Serializable
