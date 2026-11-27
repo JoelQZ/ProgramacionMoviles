@@ -11,7 +11,8 @@ data class Aviso(
     val titulo: String,
     val texto: String,
     val origen: Origen,
-    val hora: String
+    val hora: String,
+    val esUrgente: Boolean = false
 )
 
 sealed interface PermisoUi {

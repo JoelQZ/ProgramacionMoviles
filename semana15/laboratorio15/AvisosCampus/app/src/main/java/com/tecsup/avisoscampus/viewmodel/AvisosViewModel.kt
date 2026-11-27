@@ -65,7 +65,7 @@ class AvisosViewModel(
                     _faltan.value = i
                     delay(1000L)
                 }
-                val aviso = repository.registrar("Recordatorio", "Revisa tu laboratorio pendiente", Origen.RECORDATORIO)
+                val aviso = repository.registrar("Recordatorio", "Revisa tu laboratorio pendiente", Origen.RECORDATORIO, esUrgente = true)
                 _eventos.emit(aviso)
             } finally {
                 _faltan.value = null
