@@ -42,6 +42,7 @@ import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val faltan by vm.faltan.collectAsState()
 
     val lanzador = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -123,12 +124,22 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Button(onClick = { /* TODO: Paso 5 */ }) {
+                        Button(
+                            onClick = { vm.recordarEn(10) },
+                            enabled = faltan == null
+                        ) {
                             Text("Recordar en 10 s")
                         }
-                        OutlinedButton(onClick = { /* TODO: Paso 5 */ }) {
+                        OutlinedButton(
+                            onClick = { vm.cancelarRecordatorio() },
+                            enabled = faltan != null
+                        ) {
                             Text("Cancelar")
                         }
+                    }
+                    if (faltan != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Faltan $faltan s")
                     }
                 }
             }
