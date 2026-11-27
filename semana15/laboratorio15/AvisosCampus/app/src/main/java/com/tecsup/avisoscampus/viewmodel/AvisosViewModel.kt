@@ -26,7 +26,10 @@ class AvisosViewModel(
     private val _eventos = MutableSharedFlow<Aviso>()
     val eventos: SharedFlow<Aviso> = _eventos.asSharedFlow()
 
-    // TODO: Paso 2 - permisoRespondido(concedido: Boolean)
+    fun permisoRespondido(concedido: Boolean) {
+        _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
+    }
+
     // TODO: Paso 3 - avisarAhora()
     // TODO: Paso 5 - recordatorios y cuenta regresiva
     // TODO: Paso 6 - modo avión

@@ -1,5 +1,9 @@
 package com.tecsup.avisoscampus.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,15 +25,36 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.tecsup.avisoscampus.model.PermisoUi
+import com.tecsup.avisoscampus.notificacion.Notificador
 import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaAvisos(vm: AvisosViewModel) {
+    val contexto = LocalContext.current
+    val permiso by vm.permiso.collectAsState()
+
+    val lanzador = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        vm.permisoRespondido(concedido)
+    }
+
+    LaunchedEffect(Unit) {
+        if (Notificador.tienePermiso(contexto)) {
+            vm.permisoRespondido(true)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,9 +78,22 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Permiso de notificaciones", style = MaterialTheme.typography.titleMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Estado: Sin pedir")
+
+                    val (textoEstado, colorEstado) = when (permiso) {
+                        is PermisoUi.SinPedir -> "Estado: Sin pedir" to Color.Gray
+                        is PermisoUi.Concedido -> "Estado: Permitido" to Color(0xFF2E7D32)
+                        is PermisoUi.Denegado -> "Estado: Denegado" to Color(0xFFC62828)
+                    }
+                    Text(text = textoEstado, color = colorEstado)
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { /* TODO: Paso 2 */ }) {
+                    Button(onClick = {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            vm.permisoRespondido(true)
+                        }
+                    }) {
                         Text("Permitir notificaciones")
                     }
                 }
