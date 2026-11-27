@@ -9,9 +9,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AirplanemodeActive
+import androidx.compose.material.icons.rounded.Alarm
+import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,73 +29,129 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tecsup.avisoscampus.model.Aviso
 import com.tecsup.avisoscampus.model.Origen
 
 @Composable
 fun HistorialAvisos(avisos: List<Aviso>) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // Cabecera externa a la tarjeta
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = "Historial",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1E293B)
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "${avisos.size} registros",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF64748B)
+            )
+        }
 
-            if (avisos.isEmpty()) {
-                Text(
-                    text = "Sin avisos todavía",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
-                )
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    avisos.take(20).forEach { aviso ->
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Tarjeta blanca
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                if (avisos.isEmpty()) {
+                    Text(
+                        text = "Sin avisos todavía",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF94A3B8),
+                        modifier = Modifier.padding(vertical = 12.dp)
+                    )
+                } else {
+                    val listaAMostrar = avisos.take(20)
+                    listaAMostrar.forEachIndexed { index, aviso ->
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    val colorOrigen = when (aviso.origen) {
-                                        Origen.BOTON -> Color(0xFF1976D2) // Azul
-                                        Origen.RECORDATORIO -> Color(0xFFF57C00) // Ámbar/Naranja
-                                        Origen.MODO_AVION -> Color(0xFF7B1FA2) // Morado
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(colorOrigen)
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(
-                                            text = aviso.origen.texto,
-                                            color = Color.White,
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
-                                    }
-                                    Text(
-                                        text = aviso.titulo,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = aviso.texto,
-                                    style = MaterialTheme.typography.bodySmall
+                            val (bgColor, iconColor, iconVector) = when (aviso.origen) {
+                                Origen.BOTON -> Triple(
+                                    Color(0xFFCCFBF1),
+                                    Color(0xFF0F766E),
+                                    Icons.Rounded.CheckBox
+                                )
+                                Origen.RECORDATORIO -> Triple(
+                                    Color(0xFFFEF3C7),
+                                    Color(0xFFB45309),
+                                    Icons.Rounded.Alarm
+                                )
+                                Origen.MODO_AVION -> Triple(
+                                    Color(0xFFDBEAFE),
+                                    Color(0xFF1D4ED8),
+                                    Icons.Rounded.AirplanemodeActive
                                 )
                             }
+
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(bgColor),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = iconVector,
+                                    contentDescription = aviso.origen.texto,
+                                    tint = iconColor,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = aviso.origen.texto,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                                Text(
+                                    text = aviso.titulo,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF0F172A)
+                                )
+                                Text(
+                                    text = aviso.texto,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+
                             Spacer(modifier = Modifier.width(8.dp))
+
                             Text(
                                 text = aviso.hora,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
+                                fontSize = 11.sp,
+                                color = Color(0xFF94A3B8)
+                            )
+                        }
+
+                        if (index < listaAMostrar.size - 1) {
+                            HorizontalDivider(
+                                color = Color(0xFFF1F5F9),
+                                thickness = 1.dp
                             )
                         }
                     }
