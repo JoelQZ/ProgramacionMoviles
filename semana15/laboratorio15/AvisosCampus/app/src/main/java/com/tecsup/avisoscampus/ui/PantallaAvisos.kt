@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -50,6 +52,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
     val avisos by vm.avisos.collectAsState()
+    val mensaje by vm.mensaje.collectAsState()
 
     val lanzador = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -62,7 +65,10 @@ fun PantallaAvisos(vm: AvisosViewModel) {
             vm.permisoRespondido(true)
         }
         vm.eventos.collect { aviso ->
-            Notificador.mostrar(contexto, aviso)
+            val mostrado = Notificador.mostrar(contexto, aviso)
+            if (!mostrado) {
+                vm.noSePudoMostrar()
+            }
         }
     }
 
@@ -125,6 +131,37 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                         }
                     }) {
                         Text("Permitir notificaciones")
+                    }
+                }
+            }
+
+            // Banner de error / Mensaje cuando no se pudo mostrar
+            if (mensaje != null || permiso is PermisoUi.Denegado) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        if (mensaje != null) {
+                            Text(
+                                text = mensaje ?: "",
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        OutlinedButton(
+                            onClick = {
+                                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                    putExtra(Settings.EXTRA_APP_PACKAGE, contexto.packageName)
+                                }
+                                contexto.startActivity(intent)
+                            }
+                        ) {
+                            Text("Abrir ajustes", color = MaterialTheme.colorScheme.onErrorContainer)
+                        }
                     }
                 }
             }
