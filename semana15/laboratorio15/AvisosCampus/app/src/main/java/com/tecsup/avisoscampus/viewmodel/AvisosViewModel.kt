@@ -1,8 +1,10 @@
 package com.tecsup.avisoscampus.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tecsup.avisoscampus.data.AvisosRepository
 import com.tecsup.avisoscampus.model.Aviso
+import com.tecsup.avisoscampus.model.Origen
 import com.tecsup.avisoscampus.model.PermisoUi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class AvisosViewModel(
     private val repository: AvisosRepository
@@ -30,7 +33,13 @@ class AvisosViewModel(
         _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
     }
 
-    // TODO: Paso 3 - avisarAhora()
+    fun avisarAhora() {
+        viewModelScope.launch {
+            val aviso = repository.registrar("Tarea lista", "Tu entrega fue registrada", Origen.BOTON)
+            _eventos.emit(aviso)
+        }
+    }
+
     // TODO: Paso 5 - recordatorios y cuenta regresiva
     // TODO: Paso 6 - modo avión
     // TODO: Paso 8 - noSePudoMostrar()
