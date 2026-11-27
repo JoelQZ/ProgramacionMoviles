@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AirplanemodeActive
 import androidx.compose.material.icons.rounded.Alarm
+import androidx.compose.material.icons.rounded.BatteryChargingFull
 import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -98,6 +99,11 @@ fun HistorialAvisos(avisos: List<Aviso>) {
                                     Color(0xFFDBEAFE),
                                     Color(0xFF1D4ED8),
                                     Icons.Rounded.AirplanemodeActive
+                                )
+                                Origen.CARGADOR -> Triple(
+                                    Color(0xFFCCFBF1),
+                                    Color(0xFF0F766E),
+                                    Icons.Rounded.BatteryChargingFull
                                 )
                             }
 
